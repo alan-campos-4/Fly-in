@@ -1,0 +1,9 @@
+# Folders
+**/__pycache__
+**/.mypy_cache
+.venv
+.vscode
+dist
+
+# Files
+*.txt

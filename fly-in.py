@@ -22,8 +22,8 @@ def menu() -> str | None:
     }
     for key, name in options.items():
         print(f" {key} - {name}")
+    opt_str: str = input("Select an option: ")
     try:
-        opt_str: str = input("Select an option: ")
         opt: int = int(opt_str)
     except ValueError:
         print("Invalid option")
@@ -45,6 +45,7 @@ if __name__ == "__main__":
             if data:
                 g: Graph = parse_values(data)
                 path = find_paths(g)
+                print(f"--- {path} ---")
                 travel(g, path)
                 g.visualize()
         else:

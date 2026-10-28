@@ -30,7 +30,6 @@ class Node(BaseModel):
         max_drones: the maximum amount of drones that can occupy the node
         distance:   the distance to the start node
     """
-
     name: str
     x: int
     y: int
