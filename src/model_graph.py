@@ -23,11 +23,11 @@ class Graph(BaseModel):
         end:    the index of the graph's ending node.
         drones: the number of drones that will travel through the graph.
     """
+    drones: int = Field(ge=1)
     nodes: dict[int, Node]
     edges: list[tuple[int, int, int]]
     start: int
     end: int
-    drones: int = Field(ge=1)
     visual: list[list[int]] = []  # REMOVE
 
     @model_validator(mode='after')
