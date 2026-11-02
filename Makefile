@@ -20,12 +20,7 @@ help:
 	@echo "  make fclean ......... Delete the virtual environment folder"
 
 install:
-	@echo "Installing dependencies..."
-	@if $(BIN)/pip install -r requirements.txt; then \
-		echo $(GREEN)"Installation complete."$(END); \
-	else \
-		echo $(RED)"Installation failed."$(END); \
-	fi
+	@uv sync
 
 run:
 	@uv run $(NAME)
@@ -54,3 +49,6 @@ clean:
 
 build:
 	@uv build
+
+fclean:
+	@rm -rf .venv/

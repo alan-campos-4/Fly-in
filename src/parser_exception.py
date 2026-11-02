@@ -2,21 +2,27 @@ from pydantic import ValidationError
 from inspect import stack
 
 
+class ParserMessage(Exception):
+    """A custom exception that represents a ParserException's message."""
+    def __init__(self, message) -> None:
+        super().__init__(message)
+
+
 class ParserException(Exception):
-    """A custom exception that stores a custom message and field.
+    """A custom exception that stores in which file and line the error occured.
 
     Variables:
+        filename:   The name of the file in which the error is found.
+        linenum:    The number of the line where the error is found.
         message:    The error message.
-        field:      The field or scope of the error, the part of
-            the script where it occurs.
     """
 
     def __init__(self, f: str, n: int, m: str) -> None:
         if '/' in f:
-            self.file_name = f.split('/')[-1]
+            self.filename = f.split('/')[-1]
         else:
-            self.file_name = f
-        self.file_linenum = n
+            self.filename = f
+        self.linenum = n
         self.message = m
 
     @classmethod

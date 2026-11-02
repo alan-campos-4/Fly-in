@@ -48,19 +48,21 @@ if __name__ == "__main__":
         else:
             print("No file was selected.")
     except ParserException as e:
-        print(f"An error was found in file '{e.file_name}'", end='')
-        print(f" at line {e.file_linenum}:")
+        print(f"An error was found in file '{e.filename}'", end='')
+        print(f" at line {e.linenum}:")
         print(f"\t{e.message}.")
+    """
     else:
         try:
-            """if data:
+            if data:
                 g: Graph = parse_values(data)
                 path = find_paths(g)
                 print(f"--- {path} ---")
                 travel(g, path)
-                g.visualize()"""
+                g.visualize()
         except KeyboardInterrupt:
             print("\nProgram interrupted.")
         except Exception:
             print("An unknown error occured.")
             print(traceback.format_exc())
+    """
