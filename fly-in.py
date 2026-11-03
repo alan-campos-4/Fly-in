@@ -2,7 +2,6 @@
 
 import os
 import traceback
-from typing import Any
 from src import (
     Graph, ParserException, get_data_from_file,
     find_paths, travel
@@ -10,7 +9,11 @@ from src import (
 
 
 def menu() -> str | None:
-    """..."""
+    """Show the map files and return the selected file
+
+    Returns:
+        the name of the selected file, or None.
+    """
     options: dict[int, str] = {
         0: "easy/01_linear_path.txt",
         1: "easy/02_simple_fork.txt",
@@ -40,30 +43,22 @@ def menu() -> str | None:
 
 
 if __name__ == "__main__":
+    filename = menu()
+    print()
+    if not filename:
+        print("No file was selected.")
+        exit(1)
     try:
-        filename: str = menu()
-        print()
-        if filename:
-            data: dict[str, Any] = get_data_from_file(filename)
-            print(f"---- {data}")
-        else:
-            print("No file was selected.")
+        data = get_data_from_file(filename)
+        g = Graph.model_validate(data)
+        path = find_paths(g)
+        print(f"--- {path} ---")
+        travel(g, path)
+        g.visualize()
     except ParserException as e:
-        print(f"An error was found in file '{e.filename}'", end='')
-        print(f" at line {e.linenum}:")
-        print(f"\t{e.message}.")
-    """
-    else:
-        try:
-            if data:
-                g: Graph = parse_values(data)
-                path = find_paths(g)
-                print(f"--- {path} ---")
-                travel(g, path)
-                g.visualize()
-        except KeyboardInterrupt:
-            print("\nProgram interrupted.")
-        except Exception:
-            print("An unknown error occured.")
-            print(traceback.format_exc())
-    """
+        print(e.get_message())
+    except KeyboardInterrupt:
+        print("\nProgram interrupted.")
+    except Exception:
+        print("An unknown error occured.")
+        print(traceback.format_exc())

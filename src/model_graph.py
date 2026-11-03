@@ -14,16 +14,16 @@ class Graph(BaseModel):
     Other values will only affect the pathfinding and travelling processes.
 
     Variables:
-        nodes:  all the nodes in the graph stored as a dict, where the
-            key is an increasing index, and the value is a Node object
-            with the corresponding values.
-        edges:  all the edges in the graph, stored as a list of tuples
-            with the two nodes it connects and the capacity of each edge.
-        start:  the index of the graph's starting node.
-        end:    the index of the graph's ending node.
-        drones: the number of drones that will travel through the graph.
+        nb_drones:  the number of drones that will travel through the graph.
+        nodes:      all the nodes in the graph stored as a dict, where the
+                key is an increasing index, and the value is a Node object
+                with the corresponding values.
+        edges:      all the edges in the graph, stored as a list of tuples
+                with the two nodes it connects and the capacity of each edge.
+        start:      the index of the graph's starting node.
+        end:        the index of the graph's ending node.
     """
-    drones: int = Field(ge=1)
+    nb_drones: int = Field(ge=1)
     nodes: dict[int, Node]
     edges: list[tuple[int, int, int]]
     start: int
@@ -33,31 +33,6 @@ class Graph(BaseModel):
     @model_validator(mode='after')
     def check_model(self) -> Self:
         """Ensure that all the data inserted into the Graph is valid."""
-
-        def all_positions_unique() -> bool:
-            """Check that there are no repeated positions in the nodes."""
-            positions: set[tuple[int, ...]] = set()
-            for node in self.nodes.values():
-                t = tuple((node.x, node.y))
-                if t in positions:
-                    return False
-                else:
-                    positions.add(t)
-            return True
-
-        def all_edges_unique() -> bool:
-            """Check that there are no repeated edges (two edges connecting
-            the same two nodes).
-            """
-            edge_data: set[tuple[int, int]] = set()
-            for n1, n2, l in self.edges:
-                if (n1, n2) in edge_data:
-                    return False
-                elif (n2, n1) in edge_data:
-                    return False
-                else:
-                    edge_data.add((n1, n2))
-            return True
 
         def start_end_connected() -> tuple[bool, bool]:
             """Return two variables, each representing whether its nodes,
@@ -74,14 +49,6 @@ class Graph(BaseModel):
                     found_e = True
             return found_s, found_e
 
-        if not all_positions_unique():
-            raise ValueError(
-                "Found two nodes with the same coordinate values"
-            )
-        if not all_edges_unique():
-            raise ValueError(
-                "Found two different edges connecting the same two nodes"
-            )
         found_start, found_end = start_end_connected()
         f: str = ""
         match found_start, found_end:
@@ -98,7 +65,7 @@ class Graph(BaseModel):
         return self
 
     def display(self) -> None:
-        print("N of drones: ", self.drones)
+        print("N of drones: ", self.nb_drones)
         for ind, node in self.nodes.items():
             if ind == self.start:
                 print("START ", end='')

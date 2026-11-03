@@ -1,10 +1,9 @@
 from pydantic import ValidationError
-from inspect import stack
 
 
 class ParserMessage(Exception):
     """A custom exception that represents a ParserException's message."""
-    def __init__(self, message) -> None:
+    def __init__(self, message: str) -> None:
         self.message = message
 
 
@@ -21,29 +20,18 @@ class ParserException(Exception):
     message: str
 
     def __init__(self, f: str, n: int, m: str) -> None:
-        fn: str = f
         if '/' in f:
-            fn = fn.split('/')[-1]
-        self.filename = fn
+            f = f.split('/')[-1]
+        self.filename = f
         self.linenum = n
         self.message = m
 
-    @classmethod
-    def process_error(self, f: str, n: int,
-                      exc: ValidationError) -> "ParserException":
-        """Retrieve the error message of a Pydantic ValidationError and
-        display it more clearly.
-
-        The data will differ depending on what part of the code the error
-        is raised by, and the content of the error object.
-
-        Args:
-            fld:    the field or scope of the error.
-            exc:    the ValidationError object.
-
-        Raises:
-            a ParserException with the most appropiate data.
-        """
-        err = exc.errors()[0]
-        err_msg = err['msg'].split(', ')[1]
-        return ParserException(f, n, err_msg)
+    def get_message(self) -> str:
+        """Return the full message to display if an error is produced."""
+        endstr = (f"An error was found in file '{self.filename}' ")
+        if self.linenum == -1:
+            endstr += "after reading the file"
+        else:
+            endstr += f"at line {self.linenum}"
+        endstr += f":\n    {self.message}."
+        return endstr
