@@ -1,6 +1,5 @@
 from collections import deque
 from .model_graph import Graph
-from .field_exception import FieldException
 
 
 def bfs(adj_list: list[list[int]],
@@ -60,7 +59,7 @@ def shortest_distance(adj_list: list[list[int]],
 
     parent, dist = bfs(adj_list, start, size)
     if dist[end] == 1e9:
-        raise FieldException(
+        raise ValueError(
             "path finding", "The start and end nodes could not be connected "
             "to each other"
         )

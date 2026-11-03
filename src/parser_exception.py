@@ -5,7 +5,7 @@ from inspect import stack
 class ParserMessage(Exception):
     """A custom exception that represents a ParserException's message."""
     def __init__(self, message) -> None:
-        super().__init__(message)
+        self.message = message
 
 
 class ParserException(Exception):
@@ -16,12 +16,15 @@ class ParserException(Exception):
         linenum:    The number of the line where the error is found.
         message:    The error message.
     """
+    filename: str
+    linenum: int
+    message: str
 
     def __init__(self, f: str, n: int, m: str) -> None:
+        fn: str = f
         if '/' in f:
-            self.filename = f.split('/')[-1]
-        else:
-            self.filename = f
+            fn = fn.split('/')[-1]
+        self.filename = fn
         self.linenum = n
         self.message = m
 

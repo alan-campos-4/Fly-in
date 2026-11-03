@@ -2,9 +2,10 @@
 
 import os
 import traceback
+from typing import Any
 from src import (
     Graph, ParserException, get_data_from_file,
-    read_file, parse_values, find_paths, travel
+    find_paths, travel
 )
 
 
@@ -40,11 +41,11 @@ def menu() -> str | None:
 
 if __name__ == "__main__":
     try:
-        filename = menu()
+        filename: str = menu()
         print()
         if filename:
-            data = get_data_from_file(filename)
-            print(data)
+            data: dict[str, Any] = get_data_from_file(filename)
+            print(f"---- {data}")
         else:
             print("No file was selected.")
     except ParserException as e:
