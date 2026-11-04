@@ -246,12 +246,12 @@ def start_end_connected(edge_list: list[tuple[int, int, int]],
     found_start: bool = False
     found_end: bool = False
     for n1, n2, l in edge_list:
-        if found_start and found_end:
-            return None
         if found_start is False and (n1 == start or n2 == start):
             found_start = True
         if found_end is False and (n1 == end or n2 == end):
             found_end = True
+        if found_start and found_end:
+            return None
     f: str = ""
     match found_start, found_end:
         case True, False:
@@ -366,7 +366,7 @@ def get_data_from_file(filename: str) -> dict[str, Any]:
             raise ParserMessage("No start node could be found")
         if 'end' not in filedata:
             raise ParserMessage("No end node could be found")
-        start_end_connected(edge_list)
+        start_end_connected(edge_list, filedata['start'], filedata['end'])
     except ParserMessage as e:
         raise ParserException(filename, -1, e.message)
     filedata.update({'nodes': node_data})
