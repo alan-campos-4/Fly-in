@@ -16,15 +16,17 @@ class ParserException(Exception):
     linenum: int
     message: str
 
-    def __init__(self, f: str, n: int, m: str) -> None:
+    def __init__(self, filepath: str, ln: int, msg: str) -> None:
+        f = filepath
         if '/' in f:
             f = f.split('/')[-1]
         self.filename = f
-        self.linenum = n
-        self.message = m
+        self.linenum = ln
+        self.message = msg
 
     def get_message(self) -> str:
-        """Return the full message to display if an error is produced."""
+        """Return the full message to display when an error is produced."""
+
         endstr = (f"An error was found in file '{self.filename}' ")
         if self.linenum == -1:
             endstr += "after reading the file"

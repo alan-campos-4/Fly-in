@@ -241,7 +241,7 @@ def start_end_connected(edge_list: list[tuple[int, int, int]],
         end:        the index of the end node.
 
     Raises:
-        ParserMessage:  
+        ParserMessage:  if the start or the end node is missing from the list.
     """
     found_start: bool = False
     found_end: bool = False
@@ -270,12 +270,12 @@ def start_end_connected(edge_list: list[tuple[int, int, int]],
 # ==============================
 
 
-def get_data_from_file(filename: str) -> dict[str, Any]:
+def get_data_from_file(filepath: str) -> dict[str, Any]:
     """Read the data from a file and return it in a format that can be
     passed to the Map class' model_validate.
 
     Args:
-        filename:   the file that will be read.
+        filepath:   the file that will be read.
 
     Returns:
         the valid data within the file stored a dict.
@@ -284,7 +284,7 @@ def get_data_from_file(filename: str) -> dict[str, Any]:
         ParserException:    if any error is found within the file.
     """
     filedata: dict[str, Any] = {}
-    if not os.path.isfile(filename):
+    if not os.path.isfile(filepath):
         return filedata
     node_data: dict[int, Node] = {}
     edge_list: list[tuple[int, int, int]] = []
@@ -292,8 +292,8 @@ def get_data_from_file(filename: str) -> dict[str, Any]:
     is_hub: bool = False
     is_hub_s: bool = False
     is_hub_e: bool = False
-    with open(filename, 'r') as fileobj:
-        for n, line in enumerate(fileobj, start=1):
+    with open(filepath, 'r') as fileobj:
+        for linenum, line in enumerate(fileobj, start=1):
             l: str = line.strip()
             if l and not l.startswith('#'):
                 try:
@@ -356,7 +356,7 @@ def get_data_from_file(filename: str) -> dict[str, Any]:
                         "the parameter and its value"
                     )
                 except ParserMessage as e:
-                    raise ParserException(filename, n, e.message)
+                    raise ParserException(filepath, linenum, e.message)
     try:
         if not node_data:
             raise ParserMessage("No nodes could be found")
@@ -368,7 +368,7 @@ def get_data_from_file(filename: str) -> dict[str, Any]:
             raise ParserMessage("No end node could be found")
         start_end_connected(edge_list, filedata['start'], filedata['end'])
     except ParserMessage as e:
-        raise ParserException(filename, -1, e.message)
+        raise ParserException(filepath, -1, e.message)
     filedata.update({'nodes': node_data})
     filedata.update({'edges': edge_list})
     return filedata
