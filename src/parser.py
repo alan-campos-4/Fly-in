@@ -232,32 +232,35 @@ def all_edges_unique(edge_list: list[tuple[int, int, int]]) -> bool:
 
 def start_end_connected(edge_list: list[tuple[int, int, int]],
                         start: int, end: int) -> None:
-    """Return two variables, each representing whether its nodes,
-    start and end, are reachable in the graph.
+    """Iterate through the edge list and check if the start and end nodes
+    are found within it.
 
-    ...
+    Args:
+        edge_list:  a list containin all of the graph's edges.
+        start:      the index of the start node.
+        end:        the index of the end node.
+
+    Raises:
+        ParserMessage:  
     """
     found_start: bool = False
-    found_start: bool = False
-    f: str = ""
+    found_end: bool = False
     for n1, n2, l in edge_list:
-        if found_start and found_start:
-            break
-        if found_start is False and (n1 == self.start or n2 == self.start):
+        if found_start and found_end:
+            return None
+        if found_start is False and (n1 == start or n2 == start):
             found_start = True
-        if found_start is False and (n1 == self.end or n2 == self.end):
-            found_start = True
+        if found_end is False and (n1 == end or n2 == end):
+            found_end = True
+    f: str = ""
     match found_start, found_end:
         case True, False:
             f = "end node is"
         case False, True:
             f = "start node is"
-        case False, False:
-            f = "start and end nodes are"
         case _:
-            pass
-    if f != "":
-        raise ParserMessage(f"The {f} not connected to the graph")
+            f = "start and end nodes are"
+    raise ParserMessage(f"The {f} not connected to the graph")
 
 
 # ==============================

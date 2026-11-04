@@ -1,6 +1,3 @@
-from pydantic import ValidationError
-
-
 class ParserMessage(Exception):
     """A custom exception that represents a ParserException's message."""
     def __init__(self, message: str) -> None:
