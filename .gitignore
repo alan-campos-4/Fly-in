@@ -7,3 +7,4 @@ dist
 
 # Files
 maps/
+*.txt
