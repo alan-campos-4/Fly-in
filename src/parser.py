@@ -1,7 +1,7 @@
 import os
 from typing import Any
 from .model_node import Node, ZoneTypes
-from .parser_exception import ParserException, ParserMessage
+from .parser_exception import ParserError, ParserMessage
 
 
 # =============================================
@@ -113,6 +113,25 @@ def create_node(value: str) -> Node:
                 case _:
                     raise ParserMessage.find_key('METADATA_EXTRA')
     return Node.model_validate(node_values)
+
+
+def all_nodenames_unique(node_dict: dict[int, Node]) -> bool:
+    """Check that there are no repeated names in the nodes.
+
+    Args:
+        node_dict:  a dict containing all the node data.
+
+    Returns:
+        True if all the names are unique, False if one is repeated.
+    """
+    names: set[str, ...] = set()
+    for node in node_dict.values():
+        n = node.name
+        if n in names:
+            return False
+        else:
+            names.add(n)
+    return True
 
 
 def all_positions_unique(node_dict: dict[int, Node]) -> bool:
@@ -260,16 +279,16 @@ def check_soe_connected(edge_dict: dict[int, tuple[int, int, int]],
 
 def get_data_from_file(filepath: str) -> dict[str, Any]:
     """Read the data from a file and return it in a format that can be
-    passed to the Map class' model_validate.
+    passed to the Graph class' model_validate.
 
     Args:
-        filepath:   the file that will be read.
+        filepath:   the path of the file that will be read.
 
     Returns:
-        the valid data within the file stored a dict.
+        the valid data within the file stored in a dict.
 
     Raises:
-        ParserException:    if any error is found within the file.
+        ParserError:    if any error is found within the file.
     """
     filedata: dict[str, Any] = {}
     if not os.path.isfile(filepath):
@@ -319,6 +338,8 @@ def get_data_from_file(filepath: str) -> dict[str, Any]:
                                 raise ParserMessage.find_key('CONN_AFTER_HUB')
                             new_node = create_node(data)
                             node_dict.update({node_index: new_node})
+                            if not all_nodenames_unique(node_dict):
+                                raise ParserMessage.find_key('NAME_NOT_UNIQUE')
                             if not all_positions_unique(node_dict):
                                 raise ParserMessage.find_key('POS_NOT_UNIQUE')
                             if is_hub_s:
@@ -329,7 +350,7 @@ def get_data_from_file(filepath: str) -> dict[str, Any]:
                         else:
                             raise ParserMessage("Invalid name found")
                 except ParserMessage as e:
-                    raise ParserException(filepath, linenum, e.message)
+                    raise ParserError(filepath, linenum, e.message)
     try:
         if not node_dict:
             raise ParserMessage.find_key('NODES_MISS')
@@ -341,7 +362,7 @@ def get_data_from_file(filepath: str) -> dict[str, Any]:
             raise ParserMessage.find_key('END_MISS')
         check_soe_connected(edge_dict, filedata['start'], filedata['end'])
     except ParserMessage as e:
-        raise ParserException(filepath, -1, e.message)
+        raise ParserError(filepath, -1, e.message)
     filedata.update({'nodes': node_dict})
     filedata.update({'edges': edge_dict})
     return filedata

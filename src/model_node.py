@@ -20,21 +20,23 @@ class ZoneTypes(Enum):
 class Node(BaseModel):
     """A Node of a Graph. This class stores data pertaining to every node.
 
-    The name of each node, or whether it is the start or the end,
-    are not stored in this class and are processed elsewhere.
+    Which nodes are declared as the start or end node is stored
+    in the Graph class.
 
     Variables:
-        x, y:       the position of the node
-        color:      the color of the node
-        zone:       the zone the node is located in, defined by an enum
-        max_drones: the maximum amount of drones that can occupy the node
-        distance:   the distance to the start node
+        name:       the name of the node, unique to each one.
+        x, y:       the position of the node.
+        zone:       the zone the node is located in, defined by an enum.
+        color:      the color of the node.
+        drones:     the amount of drones occupying the node.
+        max_drones: the maximum amount of drones that can occupy the node.
     """
     name: str
     x: int
     y: int
-    color: str = Field(default="")
     zone: ZoneTypes = Field(default=ZoneTypes.NORMAL)
+    color: str = Field(default="")
+    drones: int = Field(default=0, ge=0)
     max_drones: int = Field(default=1, ge=1)
 
     def display(self) -> None:

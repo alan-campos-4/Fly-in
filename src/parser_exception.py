@@ -2,7 +2,7 @@ import os
 import json
 
 
-class ParserException(Exception):
+class ParserError(Exception):
     """A custom exception that stores a message describing the error,
     as well as the file and the line in which it occured.
 
@@ -36,7 +36,7 @@ class ParserException(Exception):
 
 
 class ParserMessage(Exception):
-    """Stores a message so it can later be retrieved by a ParserException.
+    """Stores a message so it can later be retrieved by a ParserError.
 
     When called with find_key(), it will try to get an error message
     from the json file, and may also receive an extra value which will

@@ -3,8 +3,8 @@
 import os
 import traceback
 from src import (
-    Graph, ParserException, get_data_from_file,
-    PathFindingError
+    Graph, ParserError, PathFindingError,
+    get_data_from_file, find_paths,  travel
 )
 
 
@@ -51,12 +51,10 @@ if __name__ == "__main__":
     try:
         data = get_data_from_file(filename)
         g = Graph.model_validate(data)
-        #path = find_paths(g)
-        #path_ordered = list(reversed(path))
-        #print(f"Path: {path_ordered}")
-        #travel(g, path_ordered)
-        g.visualize()
-    except ParserException as e:
+        path = find_paths(g)
+        travel(g, path)
+        #g.visualize()
+    except ParserError as e:
         print(e.get_message())
     except PathFindingError as e:
         print(f"An error occured during path finding: {e.message}")

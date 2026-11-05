@@ -15,6 +15,7 @@
     "NBD_REPEAT": "There can only be one number of drones",
     "CONN_AFTER_HUB": "The hubs must be placed before the connections",
     "HUB_AFTER_CONN": "The connections must be placed after the hubs",
+    "NAME_NOT_UNIQUE": "Found two different nodes with the same name",
     "EDGE_NOT_UNIQUE": "Found two different edges connecting the same two nodes",
     "POS_NOT_UNIQUE": "Found two nodes with the same coordinate values",
     "NODES_MISS": "No nodes were found",

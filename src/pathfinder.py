@@ -48,7 +48,7 @@ def bfs(adj_list: list[list[int]],
 
 def shortest_distance(adj_list: list[list[int]],
                       start: int, end: int, size: int) -> list[int]:
-    """Create a list containing the path with the shortest_distance
+    """Create a list containing the path with the shortest distance
     between the start and end nodes given.
 
     Args:
@@ -61,52 +61,48 @@ def shortest_distance(adj_list: list[list[int]],
         a list with the indexes of the nodes comprising the shortest
         path, from end to start.
     """
-
     parent, dist = bfs(adj_list, start, size)
     if dist[end] == 1e9:
         raise PathFindingError(
             "path finding", "The start and end nodes could not be connected "
             "to each other"
         )
-
     path = []
     currentNode = end
     path.append(end)
     while parent[currentNode] != -1:
         path.append(parent[currentNode])
         currentNode = parent[currentNode]
-
     return path
 
 
-def get_adjacency_list(edges: list[tuple[int, int, int]],
+def get_adjacency_list(edges: dict[int, tuple[int, int, int]],
                        size: int) -> list[list[int]]:
     """Return the adjacency list based on the edges of the graph.
+
     Args:
         edges:  the edge list from the graph
         size:   the number of node in the graph
+
     Return:
         the adjacency list of the graph, a list of lists where
             each element of the primary list represents a node,
             and each subsequent list is the neighbors of that node.
     """
     adl: list[list[int]] = [[] for _ in range(size)]
-    for edge in edges:
-        adl[edge[0]].append(edge[1])
-        adl[edge[1]].append(edge[0])
+    for n1, n2, l in edges.values():
+        adl[n1].append(n2)
+        adl[n2].append(n1)
     return adl
 
-"""
+
 def find_paths(g: Graph) -> list[int]:
-    #Return the shortest path between the start and end nodes.
-    #
+    """Return the shortest path between the start and end nodes."""
     size = len(g.nodes)
-    start = g.start
-    end = g.end
     adj_list = get_adjacency_list(g.edges, size)
-    path = shortest_distance(adj_list, start, end, size)
-    return path
-"""
+    path = shortest_distance(adj_list, g.start, g.end, size)
+    return list(reversed(path))
+
 
 """
 print("Edge list")
