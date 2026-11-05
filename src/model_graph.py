@@ -25,44 +25,10 @@ class Graph(BaseModel):
     """
     nb_drones: int = Field(ge=1)
     nodes: dict[int, Node]
-    edges: list[tuple[int, int, int]]
+    edges: dict[int, tuple[int, int, int]]
     start: int
     end: int
     visual: list[list[int]] = []  # REMOVE
-
-    @model_validator(mode='after')
-    def check_model(self) -> Self:
-        """Ensure that all the data inserted into the Graph is valid."""
-
-        def start_end_connected() -> tuple[bool, bool]:
-            """Return two variables, each representing whether its nodes,
-            start and end, are reachable in the graph.
-            """
-            found_s: bool = False
-            found_e: bool = False
-            for n1, n2, l in self.edges:
-                if found_s and found_e:
-                    break
-                if found_s is False and n1 == self.start or n2 == self.start:
-                    found_s = True
-                if found_e is False and n1 == self.end or n2 == self.end:
-                    found_e = True
-            return found_s, found_e
-
-        found_start, found_end = start_end_connected()
-        f: str = ""
-        match found_start, found_end:
-            case True, False:
-                f = "end node is"
-            case False, True:
-                f = "start node is"
-            case False, False:
-                f = "start and end nodes are"
-            case _:
-                pass
-        if f != "":
-            raise ValueError(f"The {f} not connected to the graph")
-        return self
 
     def display(self) -> None:
         print("N of drones: ", self.nb_drones)
@@ -85,8 +51,8 @@ class Graph(BaseModel):
         self.visual.append(temp)
 
     def visualize(self) -> None:
-        for e in self.edges:
-            self.addEdge(e[0], e[1])
+        for n1, n2, l in self.edges.values():
+            self.addEdge(n1, n2)
         G = nx.Graph()
         G.add_edges_from(self.visual)
         nx.draw_networkx(G)

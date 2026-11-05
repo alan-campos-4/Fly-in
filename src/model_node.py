@@ -5,11 +5,11 @@ from enum import Enum
 class ZoneTypes(Enum):
     """The different types of zone a node can be located in.
 
-        ◦ normal: Standard zone with 1 turn movement cost.
-        ◦ blocked: Inaccessible zone.
-        ◦ restricted: Movement to this zone costs 2 turns.
-        ◦ priority: Movement to this zone costs 1 turn
-            but is prioritized in pathfinding.
+    ◦ normal: Standard zone with 1 turn movement cost.
+    ◦ blocked: Inaccessible zone.
+    ◦ restricted: Movement to this zone costs 2 turns.
+    ◦ priority: Movement to this zone costs 1 turn
+        but is prioritized in pathfinding.
     """
     NORMAL = 'normal'
     BLOCKED = 'blocked'

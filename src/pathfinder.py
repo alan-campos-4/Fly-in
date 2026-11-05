@@ -2,6 +2,11 @@ from collections import deque
 from .model_graph import Graph
 
 
+class PathFindingError(Exception):
+    def __init__(self, message: str) -> None:
+        self.message = message
+
+
 def bfs(adj_list: list[list[int]],
         start: int, size: int) -> tuple[list[int], list[float]]:
     """Iterate through the graph grid to find the distance between the nodes
@@ -59,7 +64,7 @@ def shortest_distance(adj_list: list[list[int]],
 
     parent, dist = bfs(adj_list, start, size)
     if dist[end] == 1e9:
-        raise ValueError(
+        raise PathFindingError(
             "path finding", "The start and end nodes could not be connected "
             "to each other"
         )
@@ -91,17 +96,17 @@ def get_adjacency_list(edges: list[tuple[int, int, int]],
         adl[edge[1]].append(edge[0])
     return adl
 
-
+"""
 def find_paths(g: Graph) -> list[int]:
-    """Return the shortest path between the start and end nodes.
-    """
+    #Return the shortest path between the start and end nodes.
+    #
     size = len(g.nodes)
     start = g.start
     end = g.end
     adj_list = get_adjacency_list(g.edges, size)
     path = shortest_distance(adj_list, start, end, size)
     return path
-
+"""
 
 """
 print("Edge list")
