@@ -2,7 +2,11 @@
 
 # FLY-IN
 
----
+<div align="center">
+    <img src="assets/graph.svg" width="50%">
+</div>
+<br>
+
 ## Description
 
 ...
@@ -15,14 +19,17 @@
 ---
 ## Resources
 
-Guides
+#### Guides
 
-- https://www.geeksforgeeks.org/python/introduction-to-graphs-in-python/
-- https://www.w3schools.com/python/python_dsa_graphs.asp
-- https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+- [Introduction to Graphs in Python](#https://www.geeksforgeeks.org/python/introduction-to-graphs-in-python/)
 
-Projects
+#### Documentation
 
-- https://github.com/megyant/42_Fly-inç
-- https://github.com/felipehillebrand-ops/Fly-in
-- https://github.com/ELGOUMRIYASSINE/fly-in
+- [Dijkstra's_algorithm](#https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+- [uv documentation](https://docs.astral.sh/uv/)
+
+#### Projects
+
+- [Fly-in by megyant](#https://github.com/megyant/42_Fly-in)
+- [Fly-in by fjose-hi](#https://github.com/felipehillebrand-ops/Fly-in)
+- [Fly-in by yelgoumr](#https://github.com/ELGOUMRIYASSINE/fly-in)

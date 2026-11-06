@@ -47,8 +47,9 @@ class ParserGetter(Exception):
 
     @classmethod
     def find_key(self, key: str, value: str = None) -> "ParserGetter":
-        curr_dir = os.path.dirname(os.path.abspath(__file__))
-        with open(curr_dir + '/messages.json', 'r') as f:
+        cwd = os.getcwd()
+        parent = os.path.abspath(os.path.join(cwd, os.pardir))
+        with open(cwd + '/data/messages.json', 'r') as f:
             doc = json.load(f)
             msg = doc[key]
             if "{}" in msg and value is not None:
