@@ -5,7 +5,7 @@
     "INT_VAL": "{} value must be an equal or greater than 1",
     "HUB_DATA_SPLIT": "Found an incorrent amount of hub data",
     "EDGE_SPLIT": "Edge node names should be separated with '-'",
-    "EDGE_NODE_MISS": "Could not find the edge's {} node",
+    "NODE_NOT_FOUND": "Node with name {} could not be found",
     "EDGE_NOT_CONN": "The {} not connected to the graph",
     "METADATA_BRACKETS": "Metadata should be wrapped in []",
     "METADATA_SPLIT": "Metadata argument and value must be separated with '='",
@@ -21,5 +21,7 @@
     "NODES_MISS": "No nodes were found",
     "EDGES_MISS": "No edges were found",
     "START_MISS": "A start node could not be found",
-    "END_MISS": "An end node could not be found"
+    "END_MISS": "An end node could not be found",
+    "NODES_LEFT": "The following node(s) are not connected to the graph: {}",
+    "LINE_NOT_VALID": "Invalid parameter found"
 }

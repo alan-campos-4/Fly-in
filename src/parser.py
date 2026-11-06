@@ -1,6 +1,9 @@
 import os
 from typing import Any
+from pydantic import ValidationError
+from .model_graph import Graph
 from .model_node import Node, ZoneTypes
+from .model_edge import Edge
 from .parser_exception import ParserError, ParserMessage
 
 
@@ -115,44 +118,6 @@ def create_node(value: str) -> Node:
     return Node.model_validate(node_values)
 
 
-def all_nodenames_unique(node_dict: dict[int, Node]) -> bool:
-    """Check that there are no repeated names in the nodes.
-
-    Args:
-        node_dict:  a dict containing all the node data.
-
-    Returns:
-        True if all the names are unique, False if one is repeated.
-    """
-    names: set[str, ...] = set()
-    for node in node_dict.values():
-        n = node.name
-        if n in names:
-            return False
-        else:
-            names.add(n)
-    return True
-
-
-def all_positions_unique(node_dict: dict[int, Node]) -> bool:
-    """Check that there are no repeated positions in the nodes.
-
-    Args:
-        node_dict:  a dict containing all the node data.
-
-    Returns:
-        True if all the positions are unique, False if one is repeated.
-    """
-    positions: set[tuple[int, ...]] = set()
-    for node in node_dict.values():
-        t = tuple((node.x, node.y))
-        if t in positions:
-            return False
-        else:
-            positions.add(t)
-    return True
-
-
 # =============================================
 #       EDGE FUNCTIONS
 # =============================================
@@ -175,7 +140,7 @@ def find_edge_index(node_name: str, node_dict: dict[int, Node]) -> int:
 
 
 def create_edge(value: str,
-                node_dict: dict[int, Node]) -> tuple[int, int, int]:
+                node_dict: dict[int, Node]) -> Edge:
     """Create a graph edge from the value given.
 
     Args:
@@ -195,15 +160,15 @@ def create_edge(value: str,
     except ValueError:
         raise ParserMessage.find_key('METADATA_BRACKETS')
     try:
-        edge_start, edge_end = basic_data.strip().split('-')
+        node_a_name, node_b_name = basic_data.strip().split('-')
     except ValueError:
         raise ParserMessage.find_key('EDGE_SPLIT')
-    edge_start_index = find_edge_index(edge_start, node_dict)
-    edge_end_index = find_edge_index(edge_end, node_dict)
-    if edge_start_index == -1:
-        raise ParserMessage.find_key('EDGE_NODE_MISS', 'first')
-    if edge_end_index == -1:
-        raise ParserMessage.find_key('EDGE_NODE_MISS', 'second')
+    node_a_index = find_edge_index(node_a_name, node_dict)
+    node_b_index = find_edge_index(node_b_name, node_dict)
+    if node_a_index == -1:
+        raise ParserMessage.find_key('NODE_NOT_FOUND', node_a_name)
+    if node_b_index == -1:
+        raise ParserMessage.find_key('NODE_NOT_FOUND', node_b_name)
     if metadata:
         try:
             argname, argvalue = metadata.split('=')
@@ -216,28 +181,11 @@ def create_edge(value: str,
                 raise ParserMessage.find_key('EDGE_LINK_CONV')
         else:
             raise ParserMessage.find_key('METADATA_EXTRA')
-    return edge_start_index, edge_end_index, link_capacity
+    return Edge(node_a=node_a_index, node_b=node_b_index,
+                max_link_capacity=link_capacity)
 
 
-def all_edges_unique(edge_dict: dict[int, tuple[int, int, int]]) -> bool:
-    """Check that there are no repeated edges in the list, i.e:
-    two edges connecting the same two nodes.
-
-    Returns:
-        True, if all edges are unique
-    """
-    edges_found: set[tuple[int, int]] = set()
-    for n1, n2, l in edge_dict.values():
-        if (n1, n2) in edges_found:
-            return False
-        elif (n2, n1) in edges_found:
-            return False
-        else:
-            edges_found.add((n1, n2))
-    return True
-
-
-def check_soe_connected(edge_dict: dict[int, tuple[int, int, int]],
+def check_soe_connected(edge_dict: dict[int, Edge],
                         start: int, end: int) -> None:
     """Iterate through the edge list and check if the start and end nodes
     are found within it.
@@ -252,10 +200,10 @@ def check_soe_connected(edge_dict: dict[int, tuple[int, int, int]],
     """
     found_start: bool = False
     found_end: bool = False
-    for n1, n2, l in edge_dict.values():
-        if n1 == start or n2 == start:
+    for edge in edge_dict.values():
+        if edge.node_a == start or edge.node_b == start:
             found_start = True
-        if n1 == end or n2 == end:
+        if edge.node_a == end or edge.node_b == end:
             found_end = True
         if found_start is True and found_end is True:
             return None
@@ -268,6 +216,91 @@ def check_soe_connected(edge_dict: dict[int, tuple[int, int, int]],
         case _:
             f = "end node is"
     raise ParserMessage.find_key('EDGE_NOT_CONN', f)
+
+
+# =============================================
+#       CHECKING FUNCTIONS
+# =============================================
+
+
+def all_nodenames_unique(node_dict: dict[int, Node]) -> bool:
+    """Check that there are no repeated names in the nodes.
+
+    Args:
+        node_dict:  a dict containing all the node data.
+
+    Returns:
+        True if all the names are unique, False if one is repeated.
+    """
+    names = [node.name for node in node_dict.values()]
+    if len(names) != len(set(names)):
+        return False
+    return True
+
+
+def all_positions_unique(node_dict: dict[int, Node]) -> bool:
+    """Check that there are no repeated positions in the nodes.
+
+    Args:
+        node_dict:  a dict containing all the node data.
+
+    Returns:
+        True if all the positions are unique, False if one is repeated.
+    """
+    """positions: set[tuple[int, ...]] = set()
+    for node in node_dict.values():
+        t = tuple((node.x, node.y))
+        if t in positions:
+            return False
+        else:
+            positions.add(t)
+    return True"""
+
+    positions = [tuple((node.x, node.y)) for node in node_dict.values()]
+    if len(positions) != len(set(positions)):
+        return False
+    return True
+
+
+def all_edges_unique(edge_dict: dict[int, Edge]) -> bool:
+    """Check that all edges found are unique, i.e: there are no edges
+    connecting two already connected nodes, in the same or opposite order.
+
+    Returns:
+        True, if all edges are unique
+    """
+    edges_found: set[tuple[int, int]] = set()
+    for edge in edge_dict.values():
+        if (edge.node_a, edge.node_b) in edges_found:
+            return False
+        elif (edge.node_b, edge.node_a) in edges_found:
+            return False
+        else:
+            edges_found.add((edge.node_a, edge.node_b))
+    return True
+
+
+def check_nodes_connected(edges: dict[int, Edge],
+                          node_keys: set[int]) -> set[int]:
+    """Check that all the nodes found in the file are connected with
+    at least one edge.
+
+    Create two sets with all the node indexes found within the edges,
+    join them, and compare them to the node indexes found reading the file.
+
+    Variables:
+        edges:      the dict containing all the edges.
+        node_keys:  a set containing all the nodes' indexes.
+
+    Return:
+        a set with the indexes of the nodes that do not appear in an edge,
+            if all nodes are connected it is empty.
+    """
+    nodes_a = set([edge.node_a for edge in edges.values()])
+    nodes_b = set([edge.node_b for edge in edges.values()])
+    nodes_connected = nodes_a.union(nodes_b)
+    nodes_missing = node_keys.difference(nodes_connected)
+    return nodes_missing
 
 
 # =============================================
@@ -294,7 +327,7 @@ def get_data_from_file(filepath: str) -> dict[str, Any]:
     if not os.path.isfile(filepath):
         return filedata
     node_dict: dict[int, Node] = {}
-    edge_dict: dict[int, tuple[int, int, int]] = {}
+    edge_dict: dict[int, Edge] = {}
     node_index: int = 0
     edge_index: int = 0
     is_hub: bool = False
@@ -324,7 +357,10 @@ def get_data_from_file(filepath: str) -> dict[str, Any]:
                     elif name == 'connection':
                         if not node_dict:
                             raise ParserMessage.find_key('HUB_AFTER_CONN')
-                        new_edge = create_edge(data, node_dict)
+                        try:
+                            new_edge = create_edge(data, node_dict)
+                        except ValidationError as e:
+                            raise ParserMesage.process_error(e)
                         edge_dict.update({edge_index: new_edge})
                         if not all_edges_unique(edge_dict):
                             raise ParserMessage.find_key('EDGE_NOT_UNIQUE')
@@ -336,7 +372,10 @@ def get_data_from_file(filepath: str) -> dict[str, Any]:
                         if is_hub or is_hub_s or is_hub_e:
                             if edge_dict:
                                 raise ParserMessage.find_key('CONN_AFTER_HUB')
-                            new_node = create_node(data)
+                            try:
+                                new_node = create_node(data)
+                            except ValidationError as e:
+                                raise ParserMesage.process_error(e)
                             node_dict.update({node_index: new_node})
                             if not all_nodenames_unique(node_dict):
                                 raise ParserMessage.find_key('NAME_NOT_UNIQUE')
@@ -348,7 +387,7 @@ def get_data_from_file(filepath: str) -> dict[str, Any]:
                                 check_soe_found(filedata, node_index, 'end')
                             node_index += 1
                         else:
-                            raise ParserMessage("Invalid name found")
+                            raise ParserMessage.find_key('LINE_NOT_VALID')
                 except ParserMessage as e:
                     raise ParserError(filepath, linenum, e.message)
     try:
@@ -360,9 +399,17 @@ def get_data_from_file(filepath: str) -> dict[str, Any]:
             raise ParserMessage.find_key('START_MISS')
         if 'end' not in filedata:
             raise ParserMessage.find_key('END_MISS')
-        check_soe_connected(edge_dict, filedata['start'], filedata['end'])
+        missing_nodes = check_nodes_connected(edge_dict, set(node_dict.keys()))
+        if len(missing_nodes) > 0:
+            missing_node_names = [node_dict[i].name for i in missing_nodes]
+            raise ParserMessage.find_key('NODES_LEFT',
+                                         ", ".join(missing_node_names))
     except ParserMessage as e:
         raise ParserError(filepath, -1, e.message)
     filedata.update({'nodes': node_dict})
     filedata.update({'edges': edge_dict})
-    return filedata
+    try:
+        g = Graph.model_validate(filedata)
+    except ValidationError as exc:
+        raise ParserError(filepath, -1, ParserMesage.process_error(exc))
+    return g

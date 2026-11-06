@@ -15,7 +15,14 @@
 ---
 ## Resources
 
+Guides
+
 - https://www.geeksforgeeks.org/python/introduction-to-graphs-in-python/
 - https://www.w3schools.com/python/python_dsa_graphs.asp
 - https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
-...
+
+Projects
+
+- https://github.com/megyant/42_Fly-inç
+- https://github.com/felipehillebrand-ops/Fly-in
+- https://github.com/ELGOUMRIYASSINE/fly-in

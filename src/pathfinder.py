@@ -90,9 +90,9 @@ def get_adjacency_list(edges: dict[int, tuple[int, int, int]],
             and each subsequent list is the neighbors of that node.
     """
     adl: list[list[int]] = [[] for _ in range(size)]
-    for n1, n2, l in edges.values():
-        adl[n1].append(n2)
-        adl[n2].append(n1)
+    for edge in edges.values():
+        adl[edge.node_a].append(edge.node_b)
+        adl[edge.node_b].append(edge.node_a)
     return adl
 
 

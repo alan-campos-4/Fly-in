@@ -49,10 +49,10 @@ if __name__ == "__main__":
         print("No file was selected.")
         exit(1)
     try:
-        data = get_data_from_file(filename)
-        g = Graph.model_validate(data)
+        g: Graph = get_data_from_file(filename)
         path = find_paths(g)
-        travel(g, path)
+        print(f"path: {path}\n")
+        #travel(g, path)
         #g.visualize()
     except ParserError as e:
         print(e.get_message())

@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field, model_validator
 from typing_extensions import Self
 from .model_node import Node
+from .model_edge import Edge
+from .parser_exception import ParserMessage
 # REMOVE
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -9,27 +11,65 @@ import matplotlib.pyplot as plt
 class Graph(BaseModel):
     """A Graph is a non-linear data structure that consists of points,
     called nodes, and connections between those points, called edges.
-
-    For this project, our Graph will be unweighted and undirected.
-    Other values will only affect the pathfinding and travelling processes.
+    In this project, Graphs will be weighted and undirected.
 
     Variables:
-        nb_drones:  the number of drones that will travel through the graph.
-        nodes:      all the nodes in the graph stored as a dict, where the
+        nb_drones:  the number of drones that will travel through this graph.
+        nodes:      all the nodes in this graph, stored in a dict, where the
                 key is an increasing index, and the value is a Node object
                 with the corresponding values.
-        edges:      all the edges in the graph, stored as a dict, where the
-                key is an increasing index, and the value is a tuples with
-                the two nodes it connects and the capacity of each edge.
-        start:      the index of the graph's starting node.
-        end:        the index of the graph's ending node.
+        edges:      all the edges in this graph, stored in a dict, where the
+                key is an increasing index, and the value is an Edge object
+                with the corresponding values.
+        start:      the index of this graph's starting node.
+        end:        the index of this graph's ending node.
     """
     nb_drones: int = Field(ge=1)
     nodes: dict[int, Node]
-    edges: dict[int, tuple[int, int, int]]
-    start: int
-    end: int
+    edges: dict[int, Edge]
+    start: int | None = None
+    end: int | None = None
     visual: list[list[int]] = []  # REMOVE
+
+    """
+    def check_soe_connected(self, edges: dict[int, Edge],
+                        start: int, end: int) -> str | None:
+        #Iterate through the edge list and check if the start and end nodes
+        #are found within it.
+
+        Args:
+            edges:  a dict containin all of the graph's edges.
+            start:  the index of the start node.
+            end:    the index of the end node.
+
+        Returns:
+            None if the start and end nodes are present, or a string clarifying
+                which are missing.
+        ##
+        found_start: bool = False
+        found_end: bool = False
+        for edge in edges.values():
+            if edge.node_a == start or edge.node_b == start:
+                found_start = True
+            if edge.node_a == end or edge.node_b == end:
+                found_end = True
+            if found_start is True and found_end is True:
+                return None
+        f: str = ""
+        match found_start, found_end:
+            case False, True:
+                f = "start node is"
+            case False, False:
+                f = "start and end nodes are"
+            case _:
+                f = "end node is"
+        return f
+    """
+
+    @model_validator(mode='after')
+    def check_model(self) -> Self:
+        """Ensure that all the data inserted into the Graph is valid."""
+        return self
 
     def display(self) -> None:
         print("N of drones: ", self.nb_drones)

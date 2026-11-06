@@ -1,8 +1,9 @@
 from .model_graph import Graph
 from .model_node import Node
+from .model_edge import Edge
 
 
-def find_edges_in_path(edges: dict[int, tuple[int, int, int]],
+def find_edges_in_path(edges: dict[int, Edge],
                        path: list[int]) -> list[int]:
     """Create a list of the indexes of all the edges that a
     given path passes through. Its length will always be len(path) - 1.
@@ -44,18 +45,18 @@ def find_next_node(path: list[int], curr_node: int) -> int:
     return -1
 
 
-def find_edge_to_travel(edges: dict[int, tuple[int, int, int]],
+def find_edge_to_travel(edges: dict[int, Edge],
                         curr_node: int, next_node: int) -> int:
-    for edge_ind, (n1, n2, l) in edges.items():
-        if curr_node == n1 and next_node == n2:
+    for edge_ind, edge in edges.items():
+        if curr_node == edge.node_a and next_node == edge.node_b:
             return edge_ind
-        elif curr_node == n2 and next_node == n1:
+        elif curr_node == edge.node_b and next_node == edge.node_a:
             return edge_ind
     return -1
 
 
 def try_to_move(drones: dict[int, int], drone_i: int,
-                path: list[int], edges: dict[int, tuple[int, int, int]],
+                path: list[int], edges: dict[int, Edge],
                 nodes: dict[int, Node]) -> None:
     """
     select from path, with drone_val, the current node and the next one

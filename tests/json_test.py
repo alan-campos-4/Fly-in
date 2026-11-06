@@ -12,7 +12,7 @@ class ParserMessage(Exception):
         "INT_VAL": "{} value must be an equal or greater than 1",
         "HUB_DATA_SPLIT": "Found an incorrent amount of hub data",
         "EDGE_SPLIT": "Edge node names should be separated with '-'",
-        "EDGE_NODE_MISS": "Could not find the edge's {} node",
+        "NODE_NOT_FOUND": "Could not find the edge's {} node",
         "EDGE_NOT_CONN": "The {} not connected to the graph",
         "METADATA_BRACKETS": "Metadata should be wrapped in []",
         "METADATA_SPLIT": "Metadata argument and value must be separated with '='",

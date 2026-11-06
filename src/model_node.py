@@ -18,18 +18,15 @@ class ZoneTypes(Enum):
 
 
 class Node(BaseModel):
-    """A Node of a Graph. This class stores data pertaining to every node.
-
-    Which nodes are declared as the start or end node is stored
-    in the Graph class.
+    """A Node in a Graph.
 
     Variables:
-        name:       the name of the node, unique to each one.
-        x, y:       the position of the node.
-        zone:       the zone the node is located in, defined by an enum.
-        color:      the color of the node.
-        drones:     the amount of drones occupying the node.
-        max_drones: the maximum amount of drones that can occupy the node.
+        name:       the name of this node, unique to each one.
+        x, y:       the position of this node.
+        zone:       the zone this node is located in, defined by an enum.
+        color:      the color of this node.
+        drones:     the amount of drones occupying this node.
+        max_drones: the maximum amount of drones that can occupy this node.
     """
     name: str
     x: int
