@@ -1,5 +1,6 @@
 from collections import deque
 from .model_graph import Graph
+from .model_edge import Edge
 
 
 class PathFindingError(Exception):
@@ -64,8 +65,7 @@ def shortest_distance(adj_list: list[list[int]],
     parent, dist = bfs(adj_list, start, size)
     if dist[end] == 1e9:
         raise PathFindingError(
-            "path finding", "The start and end nodes could not be connected "
-            "to each other"
+            "The start and end nodes could not be connected to each other"
         )
     path = []
     currentNode = end
@@ -76,7 +76,7 @@ def shortest_distance(adj_list: list[list[int]],
     return path
 
 
-def get_adjacency_list(edges: dict[int, tuple[int, int, int]],
+def get_adjacency_list(edges: dict[int, Edge],
                        size: int) -> list[list[int]]:
     """Return the adjacency list based on the edges of the graph.
 

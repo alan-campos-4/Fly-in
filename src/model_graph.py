@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, model_validator
 from typing_extensions import Self
 from .model_node import Node
 from .model_edge import Edge
-from .parser_exception import ParserMessage
+from .parser_exception import get_message_by_key
 # REMOVE
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -27,48 +27,17 @@ class Graph(BaseModel):
     nb_drones: int = Field(ge=1)
     nodes: dict[int, Node]
     edges: dict[int, Edge]
-    start: int | None = None
-    end: int | None = None
+    start: int = Field(ge=0)
+    end: int = Field(ge=0)
     visual: list[list[int]] = []  # REMOVE
-
-    """
-    def check_soe_connected(self, edges: dict[int, Edge],
-                        start: int, end: int) -> str | None:
-        #Iterate through the edge list and check if the start and end nodes
-        #are found within it.
-
-        Args:
-            edges:  a dict containin all of the graph's edges.
-            start:  the index of the start node.
-            end:    the index of the end node.
-
-        Returns:
-            None if the start and end nodes are present, or a string clarifying
-                which are missing.
-        ##
-        found_start: bool = False
-        found_end: bool = False
-        for edge in edges.values():
-            if edge.node_a == start or edge.node_b == start:
-                found_start = True
-            if edge.node_a == end or edge.node_b == end:
-                found_end = True
-            if found_start is True and found_end is True:
-                return None
-        f: str = ""
-        match found_start, found_end:
-            case False, True:
-                f = "start node is"
-            case False, False:
-                f = "start and end nodes are"
-            case _:
-                f = "end node is"
-        return f
-    """
 
     @model_validator(mode='after')
     def check_model(self) -> Self:
         """Ensure that all the data inserted into the Graph is valid."""
+        if not self.nodes:
+            raise ValueError(get_message_by_key('NODES_MISS'))
+        if not self.edges:
+            raise ValueError(get_message_by_key('EDGES_MISS'))
         return self
 
     def display(self) -> None:
@@ -94,8 +63,8 @@ class Graph(BaseModel):
     def visualize(self) -> None:
         opt = input("Visualize? (y/n): ")
         if opt == 'y':
-            for n1, n2, l in self.edges.values():
-                self.addEdge(n1, n2)
+            for edge in self.edges.values():
+                self.addEdge(edge.node_a, edge.node_b)
             G = nx.Graph()
             G.add_edges_from(self.visual)
             nx.draw_networkx(G)
