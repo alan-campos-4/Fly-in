@@ -7,6 +7,14 @@
 </div>
 <br>
 
+## Table of Contents
+
+1. [Description](#description)
+2. [Intructions](#instructions)
+3. [Resources](#resources)
+
+---
+
 ## Description
 
 ...

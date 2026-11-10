@@ -24,7 +24,8 @@ def menu() -> str | None:
         6: "hard/01_maze_nightmare.txt",
         7: "hard/02_capacity_hell.txt",
         8: "hard/03_ultimate_challenge.txt",
-        9: "challenger/01_the_impossible_dream.txt"
+        9: "challenger/01_the_impossible_dream.txt",
+        10: "test.txt"
     }
     for key, name in options.items():
         print(f" {key} - {name}")
@@ -35,8 +36,10 @@ def menu() -> str | None:
         print("Invalid option")
     else:
         if opt in options:
-            project_dir = os.path.dirname(os.path.abspath(__file__))
-            return (project_dir + "/maps/" + options[opt])
+            cwd = os.getcwd()
+            parent = os.path.abspath(os.path.join(cwd, os.pardir))
+            # project_dir = os.path.dirname(os.path.abspath(__file__))
+            return (cwd + "/maps/" + options[opt])
         else:
             print("Option not available")
     return None
@@ -51,9 +54,11 @@ if __name__ == "__main__":
     try:
         g: Graph = get_data_from_file(filename)
         path = find_paths(g)
-        print(f"path: {path}\n")
-        #travel(g, path)
+        travel(g, path)
         #g.visualize()
+    except OSError as e:
+        msg = str(e).split(':')[0].split(']')[1].strip()
+        print(f"An error occured with the file '{filename}': {msg}.")
     except ParserError as e:
         print(e.get_message())
     except PathFindingError as e:

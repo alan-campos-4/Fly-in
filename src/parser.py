@@ -272,9 +272,9 @@ def check_missing_nodes(edges: dict[int, Edge],
 # =============================================
 
 
-def get_data_from_file(filepath: str) -> dict[str, Any]:
-    """Read the data from a file and return it in a format that can be
-    passed to the Graph class' model_validate.
+def get_data_from_file(filepath: str) -> Graph:
+    """Read the data from a file, store it in a dict and use
+    model_validate to create a Graph.
 
     Args:
         filepath:   the path of the file that will be read.
@@ -283,7 +283,10 @@ def get_data_from_file(filepath: str) -> dict[str, Any]:
         the valid data within the file stored in a dict.
 
     Raises:
-        ParserError:    if any error is found within the file.
+        FileNotFoundError:  if the file cannot be opened.
+        ParserError:        if any error is found within the file.
+        ValidationError:    if the data found cannot be
+            used to create a Graph.
     """
     filedata: dict[str, Any] = {}
     node_dict: dict[int, Node] = {}
