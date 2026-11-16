@@ -14,97 +14,104 @@ def find_edge_to_travel(edges: dict[int, Edge],
     return -1
 
 
-def is_next_node_available(nodes: dict[int, Node],
-                            next_node: int, end: int) -> bool:
-    if next_node == end:
-        return True
-    return nodes[next_node].max_drones - nodes[next_node].drones >= 1
+def is_next_node_av(nodes: dict[int, Node], node: int) -> bool:
+    return nodes[node].max_drones - nodes[node].drones >= 1
 
 
-def is_travel_edge_available(edges: dict[int, Edge],
-                             edge_to_travel: int) -> bool:
-    return (edges[edge_to_travel].max_link_capacity 
+def is_edge_traversable(edges: dict[int, Edge], edge_to_travel: int) -> bool:
+    return (edges[edge_to_travel].max_link_capacity
             - edges[edge_to_travel].occupancy >= 1)
 
 
 def try_to_move(d: Drone,
                 nodes: dict[int, Node],
-                edges: dict[int, Edge]) -> int:
+                edges: dict[int, Edge], end: int) -> bool:
     """"
     select from path, with drone_val, the current node and the next one
     find the values for the corresponding node
     if max capacity and max drones allow it, move
     if not, wait
     """
-    print(d, end='')
-    if d.delivered:
-        return 2
     next_node: int = d.get_next_node()
     edge_to_travel = find_edge_to_travel(edges, d.current_node, next_node)
-
-    print(f"  tries to move from {d.current_node} to {next_node}")
-    print(f"      node capacity of {next_node}: {next_node_space}")
-    print(f"      edge capacity of {edge_to_travel}: {edge_to_travel_capacity}")
-    if d.previous_node != -1:
-        print(f"      node capacity of {next_node} (previous): {next_node_space}")
-    if d.previous_edge != -1:
-        print(f"      edge capacity of {d.previous_edge} (previous): "
-              f"{edges[d.previous_edge].max_link_capacity - edges[d.previous_edge].occupancy}")
-    if (is_next_node_available(nodes, next_node, d.path[-1])
-            and is_travel_edge_available(edges, edge_to_travel)):
+    if next_node == end:
+        next_node_av = True
+    else:
+        next_node_av = is_next_node_av(nodes, next_node)
+    edge_to_travel_av = is_edge_traversable(edges, edge_to_travel)
+    # print(f"  tries to move from {d.current_node} to {next_node}")
+    # print(f"      capacity of node {next_node}: {next_node_av}")
+    # print(f"      capacity of edge {edge_to_travel}: {edge_to_travel_av}")
+    if (next_node_av and edge_to_travel_av):
         if d.previous_edge != -1:
             edges[d.previous_edge].occupancy -= 1
-        if d.previous_node != -1:
-            nodes[d.previous_node].drones -= 1
+        # if d.previous_node != -1:
+        #    nodes[d.previous_node].drones -= 1
         edges[edge_to_travel].occupancy += 1
+        d.previous_edge = edge_to_travel
         d.previous_node = d.current_node
         d.current_node = next_node
-        d.previous_edge = edge_to_travel
-        nodes[next_node].drones += 1
-        if d.current_node == d.path[-1]:
+        nodes[d.current_node].drones += 1
+        nodes[d.previous_node].drones -= 1
+        if d.current_node == end:
             d.delivered = True
             edges[d.previous_edge].occupancy -= 1
             d.previous_edge = -1
-        return 1                
+        return True
     else:
-        return 0
+        return False
 
 
 def all_finished(drones: list[Drone]) -> bool:
     return all(d.delivered for d in drones)
 
 
+def display_moved_drones(drones: list[Drone], nodes: dict[int, Node]) -> None:
+    print(' '.join(f"{d}-{nodes[d.current_node].name}" for d in drones))
+
+
 def travel(g: Graph, path: list[int]) -> None:
     """
     The drones will be stored in a dict of length nb_drones, in which
-    the key will be a number (0, nb_drones - 1), and the value will be
-    the index of the node it is currently located at.
+    the key will be a number (0, nb_drones - 1), and the value will an
+    object containg the data for a Drone.
+
+    The simulation start after setting all the drones at the start.
 
     Args:
         g:      the Graph object.
-        path:   a list with the indexes of all the nodes gone through.
+        path:   a list with the indexes of all the nodes will go through.
     """
     print(f"Path:  {path}")
-    # edges_in_path = find_edges_in_path(g.edges, path)
-    # print(f"Edges in path:   {edges_in_path}")
-    # print(f"Edges' capacity: {[g.edges[edge][2] for edge in edges_in_path]}")
+    end = path[-1]
 
     drones = [Drone(ind=i, path=path) for i in range(g.nb_drones)]
+    g.nodes[g.start].drones = g.nb_drones
 
     t = 1
     while 1:
         print(f"\nTurn {t}")
-        if all_finished(drones):
-            print("    All finished")
-            break
+        """for p in path:
+            n = g.nodes[p]
+            print(f"Node {p}: {n.max_drones} max, {n.drones} curr")
         for d in drones:
-            move = try_to_move(d, g.nodes, g.edges)
-            if move == 2:
-                print("     finished")
-            elif move == 1:
-                print("  will move")
+            if d.delivered:
+                print(f"{d} is finished")
             else:
-                print("  will wait")
+                print(f"{d} is in node {d.current_node}")
+        """
+        moved = []
+        for d in drones:
+            if not d.delivered:
+                # print(f"  {d}", end='')
+                move = try_to_move(d, g.nodes, g.edges, end)
+                if move:
+                    # print("  has moved")
+                    moved.append(d)
+        display_moved_drones(moved, g.nodes)
         if t >= 20:
+            break
+        if all_finished(drones):
+            print("All finished")
             break
         t += 1

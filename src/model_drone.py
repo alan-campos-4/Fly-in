@@ -12,8 +12,7 @@ class Drone(BaseModel):
         previous_node:  the index of the node this drone was located at
             in the previous turn.
         previous_edge:  the index of the edge this drone went through
-            in the previous turn.
-        in_transit:     True if this drone is travelling through the path.
+            in the previous turn.s
         delivered:      True if this drone has arrived at the end node.
     """
     ind: int
@@ -21,9 +20,7 @@ class Drone(BaseModel):
     current_node: int = Field(default=0)
     previous_node: int = Field(default=-1)
     previous_edge: int = Field(default=-1)
-    in_transit: bool = Field(default=True)
     delivered: bool = Field(default=False)
-    #transit_destination: Zone | None = None
 
     def __str__(self) -> str:
         """Return the drone identifier string."""
@@ -31,9 +28,8 @@ class Drone(BaseModel):
 
     @model_validator(mode='after')
     def check_model(self) -> Self:
-        """Ensure that all the data inserted into the Graph is valid."""
-        if not self.path:
-            raise ValueError(get_message_by_key('PATH_EMPTY'))
+        """Ensure that the path is not empty, and set the current node
+        as the first of the path, ie: the Graph's start node."""
         self.current_node = self.path[0]
         return self
 

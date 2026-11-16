@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field, model_validator
 from typing_extensions import Self
 from .model_node import Node
 from .model_edge import Edge
-from .parser_exception import get_message_by_key
 # REMOVE
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -33,11 +32,9 @@ class Graph(BaseModel):
 
     @model_validator(mode='after')
     def check_model(self) -> Self:
-        """Ensure that all the data inserted into the Graph is valid."""
-        if not self.nodes:
-            raise ValueError(get_message_by_key('NODES_MISS'))
-        if not self.edges:
-            raise ValueError(get_message_by_key('EDGES_MISS'))
+        """Change the capacity of the special drones."""
+        self.nodes[self.start].max_drones = self.nb_drones
+        self.nodes[self.end].max_drones = self.nb_drones
         return self
 
     def display(self) -> None:

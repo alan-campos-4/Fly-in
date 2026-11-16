@@ -37,15 +37,13 @@ def menu() -> str | None:
     else:
         if opt in options:
             cwd = os.getcwd()
-            parent = os.path.abspath(os.path.join(cwd, os.pardir))
-            # project_dir = os.path.dirname(os.path.abspath(__file__))
             return (cwd + "/maps/" + options[opt])
         else:
             print("Option not available")
     return None
 
 
-if __name__ == "__main__":
+def main() -> None:
     filename = menu()
     print()
     if not filename:
@@ -55,7 +53,7 @@ if __name__ == "__main__":
         g: Graph = get_data_from_file(filename)
         path = find_paths(g)
         travel(g, path)
-        #g.visualize()
+        g.visualize()
     except OSError as e:
         msg = str(e).split(':')[0].split(']')[1].strip()
         print(f"An error occured with the file '{filename}': {msg}.")
@@ -68,3 +66,7 @@ if __name__ == "__main__":
     except Exception:
         print("An unknown error occured.")
         print(traceback.format_exc())
+
+
+if __name__ == "__main__":
+    main()

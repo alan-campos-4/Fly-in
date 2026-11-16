@@ -1,4 +1,5 @@
 from collections import deque
+from typing import Deque
 from .model_graph import Graph
 from .model_edge import Edge
 
@@ -25,7 +26,7 @@ def bfs(adj_list: list[list[int]],
     parent = [-1] * size
     dist = [1e9] * size
     dist[start] = 0
-    q = deque()
+    q: Deque = deque()
     q.append(start)
     # Iterate till the queue is not empty
     while q:

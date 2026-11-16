@@ -19,6 +19,22 @@
 
 ...
 
+#### Benchmarks
+
+| Map name | Best Result (turns) |
+|--|--|
+| 01_linear_path | 4 |
+| 02_simple_fork.txt | 6 |
+| 03_basic_capacity.txt | 4 |
+| 01_dead_end_trap.txt | 8 |
+| 02_circular_loop.txt | 9 |
+| 03_priority_puzzle.txt | 8... |
+| 01_maze_nightmare.txt | 13... |
+| 02_capacity_hell.txt | 16... |
+| 03_ultimate_challenge.txt | ... |
+| 01_the_impossible_dream.txt | ... |
+
+
 ---
 ## Instructions
 

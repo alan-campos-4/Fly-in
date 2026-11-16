@@ -11,6 +11,7 @@
     "METADATA_SPLIT": "Metadata argument and value must be separated with '='",
     "METADATA_REPEAT": "Metadata contains repeated argument",
     "METADATA_EXTRA": "Metadata contains non-valid argument",
+    "SOE_MAX_DRONES": "The {} node cannot receive a custom max_drones value",
     "SOE_REPEAT": "There can only be one {} node",
     "NBD_REPEAT": "There can only be one number of drones",
     "CONN_AFTER_HUB": "The hubs must be placed before the connections",

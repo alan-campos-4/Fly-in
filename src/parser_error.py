@@ -3,28 +3,6 @@ import json
 from pydantic import ValidationError
 
 
-def get_message_by_key(key: str, add: str | None = None) -> str:
-    """Load the json file containing the error messages, try to find
-    one with the key, and return the message.
-
-    Args:
-        key:    the key that will identify a message from the file.
-        add:    an optional string that can be added to the message to
-            complete the message.
-
-    Returns:
-        a message loaded from the json file, with another string added
-            if one was given and the message allows for it.
-    """
-    curr_dir: str = os.path.dirname(os.path.abspath(__file__))
-    with open(curr_dir + '/messages.json', 'r') as f:
-        doc = json.load(f)
-        msg: str = doc[key]
-        if "{}" in msg and add is not None:
-            msg = msg.replace("{}", add)
-        return msg
-
-
 class ParserError(Exception):
     """A custom exception that stores a message describing the error,
     as well as the file and the line in which it occured.
@@ -77,7 +55,13 @@ class ParserMessage(Exception):
         """Load the json file containing the error messages, try to find
         one with the key, and save it in a ParserMesage instance.
         """
-        return ParserMessage(get_message_by_key(key, add))
+        cwd = os.getcwd()
+        with open(cwd + '/data/messages.json', 'r') as f:
+            doc = json.load(f)
+            msg: str = doc[key]
+            if "{}" in msg and add is not None:
+                msg = msg.replace("{}", add)
+            return ParserMessage(msg)
 
     @classmethod
     def process_error(self, exc: ValidationError) -> "ParserMessage":

@@ -9,3 +9,9 @@ dependencies = [
     "matplotlib>=3.10.9",
     "networkx>=3.4.2",
 ]
+
+[tool.mypy]
+exclude = [
+  ".venv",
+  "tests",
+]

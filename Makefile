@@ -29,13 +29,13 @@ debug:
 	@uv run --with-requirements $(NAME) python -m pdb $(NAME)
 
 lint:
-	@-flake8 . --exclude .git,.mypy_cache,.venv,__pycache__
+	@-flake8 . --exclude .git,.mypy_cache,.venv,__pycache__,tests
 	@-mypy . --warn-return-any --warn-unused-ignores \
 		--ignore-missing-imports --disallow-untyped-defs \
 		--check-untyped-defs
 
 lint-strict:
-	@-flake8 . --exclude .git,.mypy_cache,.venv,__pycache__
+	@-flake8 . --exclude .git,.mypy_cache,.venv,__pycache__,tests
 	@-mypy . --strict --warn-return-any --warn-unused-ignores \
 		--ignore-missing-imports --disallow-untyped-defs \
 		--check-untyped-defs

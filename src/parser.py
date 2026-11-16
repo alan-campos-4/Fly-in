@@ -1,10 +1,9 @@
-import os
 from typing import Any
 from pydantic import ValidationError
 from .model_graph import Graph
 from .model_node import Node, ZoneTypes
 from .model_edge import Edge
-from .parser_exception import ParserError, ParserMessage
+from .parser_error import ParserError, ParserMessage
 
 
 # =============================================
@@ -49,18 +48,19 @@ def check_soe_found(filedata: dict[str, Any],
     Raises:
         ParserMessage:  if the given special node already exists.
     """
-
     if typestr in filedata:
         raise ParserMessage.by_key('SOE_REPEAT', typestr)
     filedata.update({typestr: node_index})
 
 
-def create_node(value: str) -> Node:
+def create_node(value: str, is_start: bool, is_end: bool) -> Node:
     """Create a graph node from the value given. Store all the data found
     in a dict, and use it with model_validate to create a Node.
 
     Args:
-        value:  The string containing data for a specific node.
+        value:      A string containing data for a new node, after the ':'.
+        is_start:   True if this new node is the start node.
+        is_end:     True if this new node is the end node.
 
     Returns:
         A new node object.
@@ -101,6 +101,12 @@ def create_node(value: str) -> Node:
                             except ValueError:
                                 raise ParserMessage.by_key('CONV',
                                                            'max drones')
+                            if is_start:
+                                raise ParserMessage.by_key('SOE_MAX_DRONES',
+                                                           'start')
+                            if is_end:
+                                raise ParserMessage.by_key('SOE_MAX_DRONES',
+                                                           'end')
                             if md < 1:
                                 raise ParserMessage.by_key('INT_VAL',
                                                            'Max drones')
@@ -131,7 +137,10 @@ def find_edge_index(node_name: str, node_dict: dict[int, Node]) -> int:
         node_dict:  The dict containing all the nodes.
 
     Returns:
-        the index of the node found, or -1 if it's not found.
+        the index of the node found.
+
+    Raises:
+        ParserMessage:  if the index is not found in the dict.
     """
     for index, node in node_dict.items():
         if node.name == node_name:
@@ -143,7 +152,7 @@ def create_edge(value: str, node_dict: dict[int, Node]) -> Edge:
     """Create a graph edge from the value given.
 
     Args:
-        value:      A string containing the file's data on a single edge.
+        value:      A string containing data for a new edge, after the ':'.
         node_dict:  The dict containing all the nodes.
 
     Returns:
@@ -209,15 +218,6 @@ def all_positions_unique(node_dict: dict[int, Node]) -> bool:
     Returns:
         True if all the positions are unique, False if one is repeated.
     """
-    """positions: set[tuple[int, ...]] = set()
-    for node in node_dict.values():
-        t = tuple((node.x, node.y))
-        if t in positions:
-            return False
-        else:
-            positions.add(t)
-    return True"""
-
     positions = [tuple((node.x, node.y)) for node in node_dict.values()]
     if len(positions) != len(set(positions)):
         return False
@@ -229,7 +229,7 @@ def all_edges_unique(edge_dict: dict[int, Edge]) -> bool:
     connecting two already connected nodes, in the same or opposite order.
 
     Returns:
-        True, if all edges are unique
+        True if all edges are unique, False otherwise.
     """
     edges_found: set[tuple[int, int]] = set()
     for edge in edge_dict.values():
@@ -242,21 +242,21 @@ def all_edges_unique(edge_dict: dict[int, Edge]) -> bool:
     return True
 
 
-def check_missing_nodes(edges: dict[int, Edge],
-                          node_keys: set[int]) -> set[int]:
-    """Check that all the nodes found in the file are connected with
-    at least one edge.
+def get_isolated_nodes(edges: dict[int, Edge],
+                       node_keys: set[int]) -> set[int]:
+    """Check if there are any isolated nodes in the graph, i.e: nodes not
+    connected to any other node.
 
-    Create two sets with all the node indexes found within the edges,
-    join them, and compare them to the node indexes found reading the file.
+    Create two sets with the node indexes found on either side of an edge,
+    join them, and compare them to the total amount of nodes found.
 
     Variables:
         edges:      the dict containing all the edges.
         node_keys:  a set containing all the nodes' indexes.
 
-    Return:
-        a set with the indexes of the nodes that do not appear in any edges,
-            or an empty set if all nodes are connected.
+    Returns:
+        a set with the indexes of the isolated nodes, or an empty set
+            if all the nodes are connected.
     """
     nodes_a = set([edge.node_a for edge in edges.values()])
     nodes_b = set([edge.node_b for edge in edges.values()])
@@ -273,20 +273,20 @@ def check_missing_nodes(edges: dict[int, Edge],
 
 
 def get_data_from_file(filepath: str) -> Graph:
-    """Read the data from a file, store it in a dict and use
-    model_validate to create a Graph.
+    """Read the data from a file, iterate through every line, store
+    all valid data in a dict, and use model_validate to create a Graph.
 
     Args:
         filepath:   the path of the file that will be read.
 
     Returns:
-        the valid data within the file stored in a dict.
+        a Graph object with the data from the file.
 
     Raises:
         FileNotFoundError:  if the file cannot be opened.
-        ParserError:        if any error is found within the file.
-        ValidationError:    if the data found cannot be
-            used to create a Graph.
+        ParserError:        if the data found in the file is invalid,
+            or there is data repeated or missing.
+        ValidationError:    if the data cannot validated as a Graph.
     """
     filedata: dict[str, Any] = {}
     node_dict: dict[int, Node] = {}
@@ -294,8 +294,8 @@ def get_data_from_file(filepath: str) -> Graph:
     node_index: int = 0
     edge_index: int = 0
     is_hub: bool = False
-    is_hub_s: bool = False
-    is_hub_e: bool = False
+    is_sh: bool = False
+    is_eh: bool = False
     with open(filepath, 'r') as fileobj:
         for linenum, line in enumerate(fileobj, start=1):
             l: str = line.strip()
@@ -330,13 +330,13 @@ def get_data_from_file(filepath: str) -> Graph:
                         edge_index += 1
                     else:
                         is_hub = name == 'hub'
-                        is_hub_s = name == 'start_hub'
-                        is_hub_e = name == 'end_hub'
-                        if is_hub or is_hub_s or is_hub_e:
+                        is_sh = name == 'start_hub'
+                        is_eh = name == 'end_hub'
+                        if is_hub or is_sh or is_eh:
                             if edge_dict:
                                 raise ParserMessage.by_key('CONN_AFTER_HUB')
                             try:
-                                new_node = create_node(data)
+                                new_node = create_node(data, is_sh, is_eh)
                             except ValidationError as e:
                                 raise ParserMessage.process_error(e)
                             node_dict.update({node_index: new_node})
@@ -344,9 +344,9 @@ def get_data_from_file(filepath: str) -> Graph:
                                 raise ParserMessage.by_key('NAME_NOT_UNIQUE')
                             if not all_positions_unique(node_dict):
                                 raise ParserMessage.by_key('POS_NOT_UNIQUE')
-                            if is_hub_s:
+                            if is_sh:
                                 check_soe_found(filedata, node_index, 'start')
-                            if is_hub_e:
+                            if is_eh:
                                 check_soe_found(filedata, node_index, 'end')
                             node_index += 1
                         else:
@@ -362,11 +362,10 @@ def get_data_from_file(filepath: str) -> Graph:
             raise ParserMessage.by_key('START_MISS')
         if 'end' not in filedata:
             raise ParserMessage.by_key('END_MISS')
-        missing_nodes = check_missing_nodes(edge_dict, set(node_dict.keys()))
-        if len(missing_nodes) > 0:
-            missing_node_names = [node_dict[i].name for i in missing_nodes]
-            raise ParserMessage.by_key('NODES_LEFT',
-                                       ", ".join(missing_node_names))
+        iso_nodes = get_isolated_nodes(edge_dict, set(node_dict.keys()))
+        if len(iso_nodes) > 0:
+            iso_node_names = [node_dict[i].name for i in iso_nodes]
+            raise ParserMessage.by_key('NODES_LEFT', ", ".join(iso_node_names))
     except ParserMessage as e:
         raise ParserError(filepath, -1, e.message)
     filedata.update({'nodes': node_dict})
@@ -374,5 +373,6 @@ def get_data_from_file(filepath: str) -> Graph:
     try:
         g = Graph.model_validate(filedata)
     except ValidationError as exc:
-        raise ParserError(filepath, -1, ParserMessage.process_error(exc))
+        msg = ParserMessage.process_error(exc).message
+        raise ParserError(filepath, -1, msg)
     return g
