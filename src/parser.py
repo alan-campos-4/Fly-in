@@ -90,37 +90,33 @@ def create_node(value: str, is_start: bool, is_end: bool) -> Node:
                 argname, argvalue = arg.split('=')
             except ValueError:
                 raise ParserMessage.by_key('METADATA_SPLIT')
-            match argname:
-                case 'color' | 'max_drones' | 'zone':
-                    if argname in node_values:
-                        raise ParserMessage.by_key('METADATA_REPEAT')
-                    match argname:
-                        case 'max_drones':
-                            try:
-                                md = int(argvalue)
-                            except ValueError:
-                                raise ParserMessage.by_key('CONV',
-                                                           'max drones')
-                            if is_start:
-                                raise ParserMessage.by_key('SOE_MAX_DRONES',
-                                                           'start')
-                            if is_end:
-                                raise ParserMessage.by_key('SOE_MAX_DRONES',
-                                                           'end')
-                            if md < 1:
-                                raise ParserMessage.by_key('INT_VAL',
-                                                           'Max drones')
-                            node_values.update({argname: md})
-                        case 'zone':
-                            try:
-                                node_values.update({argname:
-                                                    ZoneTypes(argvalue)})
-                            except ValueError:
-                                raise ParserMessage.by_key('HUB_ZONE_CONV')
-                        case _:
-                            node_values.update({argname: argvalue})
-                case _:
-                    raise ParserMessage.by_key('METADATA_EXTRA')
+            is_color = argname == 'color'
+            is_zone = argname == 'zone'
+            is_md = argname == 'max_drones'
+            if is_color or is_md or is_zone:
+                if argname in node_values:
+                    raise ParserMessage.by_key('METADATA_REPEAT')
+                if is_md:
+                    try:
+                        md = int(argvalue)
+                    except ValueError:
+                        raise ParserMessage.by_key('CONV', 'max drones')
+                    if is_start:
+                        raise ParserMessage.by_key('SOE_MAX_DRONES', 'start')
+                    if is_end:
+                        raise ParserMessage.by_key('SOE_MAX_DRONES', 'end')
+                    if md < 1:
+                        raise ParserMessage.by_key('INT_VAL', 'Max drones')
+                    node_values.update({argname: md})
+                elif is_zone:
+                    try:
+                        node_values.update({argname: ZoneTypes(argvalue)})
+                    except ValueError:
+                        raise ParserMessage.by_key('HUB_ZONE_CONV')
+                else:
+                    node_values.update({argname: argvalue})
+            else:
+                raise ParserMessage.by_key('METADATA_EXTRA')
     return Node.model_validate(node_values)
 
 
@@ -373,6 +369,5 @@ def get_data_from_file(filepath: str) -> Graph:
     try:
         g = Graph.model_validate(filedata)
     except ValidationError as exc:
-        msg = ParserMessage.process_error(exc).message
-        raise ParserError(filepath, -1, msg)
+        raise ParserError.process_error(filepath, -1, exc)
     return g

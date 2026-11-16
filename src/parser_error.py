@@ -12,6 +12,7 @@ class ParserError(Exception):
         linenum:    The number of the line where the error is found.
         message:    The error message.
     """
+
     filename: str
     linenum: int
     message: str
@@ -34,6 +35,33 @@ class ParserError(Exception):
             endstr += f"at line {self.linenum}"
         endstr += f":\n    {self.message}."
         return endstr
+
+    @classmethod
+    def process_error(self, f: str, l: int,
+                      exc: ValidationError) -> "ParserError":
+        """Retrieve the error message of a Pydantic ValidationError and
+        display it more clearly.
+
+        The data will differ depending on what part of the code the error
+        is raised by, and the content of the error object.
+
+        Args:
+            exc:    the ValidationError object.
+
+        Returns:
+            a ParserError instance with the ValidationError's message.
+        """
+        err_msg: str
+        loc_str: str
+        err = exc.errors()[0]
+        err_msg = err['msg']
+        if ',' in err_msg:
+            err_msg = err_msg.split(', ')[1]
+        loc = err['loc']
+        if loc and type(loc[0]).__name__ == 'str':
+            loc_str = str(loc[0])
+            err_msg = "For variable '" + loc_str + "': " + err_msg
+        return ParserError(f, l, err_msg)
 
 
 class ParserMessage(Exception):
@@ -62,29 +90,3 @@ class ParserMessage(Exception):
             if "{}" in msg and add is not None:
                 msg = msg.replace("{}", add)
             return ParserMessage(msg)
-
-    @classmethod
-    def process_error(self, exc: ValidationError) -> "ParserMessage":
-        """Retrieve the error message of a Pydantic ValidationError and
-        display it more clearly.
-
-        The data will differ depending on what part of the code the error
-        is raised by, and the content of the error object.
-
-        Args:
-            exc:    the ValidationError object.
-
-        Raises:
-            a ParserMessage instance with the ValidationError's message.
-        """
-        err_msg: str
-        loc_str: str
-        err = exc.errors()[0]
-        err_msg = err['msg']
-        if ',' in err_msg:
-            err_msg = err_msg.split(', ')[1]
-        loc = err['loc']
-        if loc and type(loc[0]).__name__ == 'str':
-            loc_str = str(loc[0])
-            err_msg = "For variable '" + loc_str + "': " + err_msg
-        return ParserMessage(err_msg)

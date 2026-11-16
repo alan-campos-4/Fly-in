@@ -52,7 +52,8 @@ def main() -> None:
     try:
         g: Graph = get_data_from_file(filename)
         path = find_paths(g)
-        travel(g, path)
+        print(path)
+        # travel(g, path)
         g.visualize()
     except OSError as e:
         msg = str(e).split(':')[0].split(']')[1].strip()

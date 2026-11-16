@@ -12,7 +12,7 @@ class Drone(BaseModel):
         previous_node:  the index of the node this drone was located at
             in the previous turn.
         previous_edge:  the index of the edge this drone went through
-            in the previous turn.s
+            in the previous turn.
         delivered:      True if this drone has arrived at the end node.
     """
     ind: int
@@ -28,14 +28,15 @@ class Drone(BaseModel):
 
     @model_validator(mode='after')
     def check_model(self) -> Self:
-        """Ensure that the path is not empty, and set the current node
-        as the first of the path, ie: the Graph's start node."""
+        """Set the current node as the the first node of the path, i.e:
+        the Graph's start node."""
         self.current_node = self.path[0]
         return self
 
     def get_next_node(self) -> int:
+        """Return the index of the next node in the path"""
         i = 0
-        while i < len(self.path):
+        while i < len(self.path) - 1:
             if self.path[i] == self.current_node:
                 return self.path[i + 1]
             i += 1
