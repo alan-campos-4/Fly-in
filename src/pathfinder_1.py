@@ -1,14 +1,7 @@
 from collections import deque
 from typing import Deque
 import random
-from .model_graph import Graph
-from .model_node import Node
-from .model_edge import Edge
-
-
-class PathFindingError(Exception):
-    def __init__(self, message: str) -> None:
-        self.message = message
+from .models import Graph, Node, Edge
 
 
 def shortest_distance(adj_list: list[list[int]], nodes: dict[int, Node], 
@@ -74,7 +67,7 @@ def get_adjacency_list(edges: dict[int, Edge],
     return adl
 
 
-def find_paths(g: Graph) -> list[int]:
+def find_paths_1(g: Graph) -> list[int]:
     """Return the shortest path between the start and end nodes."""
     size = len(g.nodes)
     adj_list = get_adjacency_list(g.edges, size)

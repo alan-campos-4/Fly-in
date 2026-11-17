@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, model_validator
 from typing_extensions import Self
-from .model_node import Node
-from .model_edge import Edge
+from .node import Node
+from .edge import Edge
 # REMOVE
 import networkx as nx
 import matplotlib.pyplot as plt

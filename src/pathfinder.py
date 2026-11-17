@@ -1,7 +1,6 @@
 from collections import deque
 from typing import Deque
-from .model_graph import Graph
-from .model_edge import Edge
+from .models import Graph, Edge
 
 
 class PathFindingError(Exception):
@@ -44,7 +43,6 @@ def bfs(adj_list: list[list[int]],
                 dist[neighbour] = dist[node] + 1
                 # Insert the neighbouring node to the queue
                 q.append(neighbour)
-
     return parent, dist
 
 

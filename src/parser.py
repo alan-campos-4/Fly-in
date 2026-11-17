@@ -1,8 +1,6 @@
 from typing import Any
 from pydantic import ValidationError
-from .model_graph import Graph
-from .model_node import Node, ZoneTypes
-from .model_edge import Edge
+from .models import Graph, Node, ZoneTypes, Edge
 from .parser_error import ParserError, ParserMessage
 
 

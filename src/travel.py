@@ -1,7 +1,4 @@
-from .model_graph import Graph
-from .model_node import Node
-from .model_edge import Edge
-from .model_drone import Drone
+from .models import Graph, Node, Edge, Drone
 
 
 def display_drones(drones: list[Drone], nodes: dict[int, Node]) -> None:

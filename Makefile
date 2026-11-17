@@ -1,7 +1,5 @@
 NAME = fly-in.py
 
-PYTHON = uv
-
 GREEN = "\033[0;32m"
 RED   = "\033[0;31m"
 END   = "\033[0m"
@@ -23,7 +21,7 @@ install:
 	@uv sync
 
 run:
-	@uv run $(NAME)
+	@uv run $(NAME) $(ARGS)
 
 debug:
 	@uv run --with-requirements $(NAME) python -m pdb $(NAME)

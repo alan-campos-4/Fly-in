@@ -1,11 +1,20 @@
 #!/usr/bin/python3
 
 import os
+import argparse
 import traceback
 from src import (
     Graph, ParserError, PathFindingError,
-    get_data_from_file, find_paths,  travel
+    get_data_from_file, find_paths, find_paths_1, find_paths_2,
+    travel
 )
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse the arguments received through the command line"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--pathfinder", default=0)
+    return parser.parse_args()
 
 
 def menu() -> str | None:
@@ -45,14 +54,20 @@ def menu() -> str | None:
 
 def main() -> None:
     filename = menu()
+    args = parse_args()
     print()
     if not filename:
         print("No file was selected.")
         exit(1)
     try:
         g: Graph = get_data_from_file(filename)
-        path = find_paths(g)
-        print(path)
+        if args.pathfinder == "1":
+            path = find_paths_1(g)
+        elif args.pathfinder == "2":
+            path = find_paths_2(g)
+        else:
+            path = find_paths(g)
+        print(f"\nPath: {path}")
         # travel(g, path)
         g.visualize()
     except OSError as e:
