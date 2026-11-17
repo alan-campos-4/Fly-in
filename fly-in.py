@@ -10,15 +10,21 @@ from src import (
 )
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse the arguments received through the command line"""
+def arguments() -> argparse.Namespace:
+    """Parse the arguments received through the command line.
+
+        map_file:   the index for a map file.
+        pathfinder: the index for the algorithm used for pathfinding.
+    """
     parser = argparse.ArgumentParser()
+    parser.add_argument("--map_file", default=-1)
     parser.add_argument("--pathfinder", default=0)
     return parser.parse_args()
 
 
-def menu() -> str | None:
-    """Show the map files and return the selected file
+def menu(map_file: int) -> str | None:
+    """Return the selected map file. If not received by parameter,
+    display all possibles files in the output.
 
     Returns:
         the name of the selected file, or None.
@@ -36,25 +42,28 @@ def menu() -> str | None:
         9: "challenger/01_the_impossible_dream.txt",
         10: "test.txt"
     }
-    for key, name in options.items():
-        print(f" {key} - {name}")
-    opt_str: str = input("Select an option: ")
     try:
-        opt: int = int(opt_str)
+        if map_file != -1:
+            opt: int = int(map_file)
+        else:
+            for key, name in options.items():
+                print(f" {key} - {name}")
+            opt_str: str = input("Select an option: ")
+            opt: int = int(opt_str)
     except ValueError:
-        print("Invalid option")
+        print("Invalid input.")
     else:
         if opt in options:
             cwd = os.getcwd()
             return (cwd + "/maps/" + options[opt])
         else:
-            print("Option not available")
+            print("Option not available.")
     return None
 
 
 def main() -> None:
-    filename = menu()
-    args = parse_args()
+    args = arguments()
+    filename = menu(args.map_file)
     print()
     if not filename:
         print("No file was selected.")

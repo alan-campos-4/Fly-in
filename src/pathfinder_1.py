@@ -4,44 +4,61 @@ import random
 from .models import Graph, Node, Edge
 
 
-def shortest_distance(adj_list: list[list[int]], nodes: dict[int, Node], 
-                      start: int, end: int, size: int) -> list[int]:
+def list_difference(l: list[int], l_remove: list[int]) -> None:
+    """
+    Similar to set.difference
+    """
+    for e in l:
+        if e in l_remove:
+            l.remove(e)
+
+
+def find_one_path(adj_list: list[list[int]], g: Graph) -> list[int]:
     """..."""
-    path = set()
-    current_node = start
-    path.add(current_node)
+    path = []
+    v_nodes = set()
+    current_node = g.start
+    path.append(current_node)
+    v_nodes.add(current_node)
     i = 0
     iters = 100
     while i < iters:
         print(f"current node is : {current_node}")
-        possible = set()
-        prioritized = set()
+        possible = []
+        prioritized = []
         next_node = -1
         print(f" - > {adj_list[current_node]}")
         if len(adj_list[current_node]) >= 1:
             for neighbor in adj_list[current_node]:
-                if nodes[neighbor].zone.value == 'priority':
-                    prioritized.add(neighbor)
-                elif nodes[neighbor].zone.value != 'blocked':
-                    possible.add(neighbor)
-            prioritized = prioritized - path            
-            possible = possible - path
+                if neighbor not in path and neighbor not in v_nodes:
+                    if g.nodes[neighbor].zone.value == 'priority':
+                        prioritized.append(neighbor)
+                    elif g.nodes[neighbor].zone.value != 'blocked':
+                        possible.append(neighbor)
             print(f"  possible {possible}")
             print(f"  priority {prioritized}")
             if prioritized:
-                next_node = random.choice(list(prioritized))
+                next_node = random.choice(prioritized)
             elif possible:
-                next_node = random.choice(list(possible))    
+                if v_nodes:
+                    list_difference(possible, list(v_nodes))
+                next_node = random.choice(possible)
         else:
             next_node = adj_list[current_node][0]
         if next_node != -1:
             print(f"    next is {next_node}")
             current_node = next_node
-            path.add(next_node)
+            path.append(next_node)
+            v_nodes.add(next_node)
         else:
-            current_node = list(path).pop()
+            if len(path) > 1:
+                path.pop()
+                current_node = path.pop()
+                print(f"    went back to {current_node}")
+            else:
+                current_node = g.start
         print(path)
-        if current_node == end:
+        if current_node == g.end:
             break
         i += 1
     return list(path)
@@ -71,6 +88,13 @@ def find_paths_1(g: Graph) -> list[int]:
     """Return the shortest path between the start and end nodes."""
     size = len(g.nodes)
     adj_list = get_adjacency_list(g.edges, size)
-    path = shortest_distance(adj_list, g.nodes, g.start, g.end, size)
-    print(f"Path: {path}")
-    return list(reversed(path))
+    visited_nodes = set()
+    visited_edges = set()
+    possible_paths = []
+    for _ in range(3):
+        p = find_one_path(adj_list, g)
+        visited_nodes = visited_nodes.union(p)
+        possible_paths.append(p)
+        print(f"Path:     {p}")
+        print(f"v nodes: {visited_nodes}")
+    return possible_paths
