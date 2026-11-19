@@ -50,3 +50,8 @@ build:
 
 fclean:
 	@rm -rf .venv/
+
+test:
+	@uv run $(NAME) --pathfinder 0 $(ARGS)
+	@uv run $(NAME) --pathfinder 1 $(ARGS)
+	@uv run $(NAME) --pathfinder 2 $(ARGS)

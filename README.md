@@ -18,6 +18,15 @@
 
 ...
 
+#### Pathfinding limitations
+
+Blocked zones: nodes marked with this zonetype are removed from the adjancency list before pathfinding starts, thus preventing them from being used in the algorithm.
+
+Priority zones: nodes marked with this zonetype are checked during pathfinding and assigned as the parent of a node when appropiate
+
+Restricted zones:
+...
+
 #### Benchmarks
 
 | Map name | Best Result (turns) |

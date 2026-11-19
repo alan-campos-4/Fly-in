@@ -18,7 +18,6 @@ def arguments() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--map_file", default=-1)
-    parser.add_argument("--pathfinder", default=0)
     return parser.parse_args()
 
 
@@ -70,12 +69,7 @@ def main() -> None:
         exit(1)
     try:
         g: Graph = get_data_from_file(filename)
-        if args.pathfinder == "1":
-            path = find_paths_1(g)
-        elif args.pathfinder == "2":
-            path = find_paths_2(g)
-        else:
-            path = find_paths(g)
+        find_paths(g)
         print(f"\nPath: {path}")
         # travel(g, path)
         g.visualize()

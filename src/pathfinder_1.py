@@ -13,55 +13,12 @@ def list_difference(l: list[int], l_remove: list[int]) -> None:
             l.remove(e)
 
 
-def find_one_path(adj_list: list[list[int]], g: Graph) -> list[int]:
-    """..."""
-    path = []
-    v_nodes = set()
-    current_node = g.start
-    path.append(current_node)
-    v_nodes.add(current_node)
-    i = 0
-    iters = 100
-    while i < iters:
-        print(f"current node is : {current_node}")
-        possible = []
-        prioritized = []
-        next_node = -1
-        print(f" - > {adj_list[current_node]}")
-        if len(adj_list[current_node]) >= 1:
-            for neighbor in adj_list[current_node]:
-                if neighbor not in path and neighbor not in v_nodes:
-                    if g.nodes[neighbor].zone.value == 'priority':
-                        prioritized.append(neighbor)
-                    elif g.nodes[neighbor].zone.value != 'blocked':
-                        possible.append(neighbor)
-            print(f"  possible {possible}")
-            print(f"  priority {prioritized}")
-            if prioritized:
-                next_node = random.choice(prioritized)
-            elif possible:
-                if v_nodes:
-                    list_difference(possible, list(v_nodes))
-                next_node = random.choice(possible)
-        else:
-            next_node = adj_list[current_node][0]
-        if next_node != -1:
-            print(f"    next is {next_node}")
-            current_node = next_node
-            path.append(next_node)
-            v_nodes.add(next_node)
-        else:
-            if len(path) > 1:
-                path.pop()
-                current_node = path.pop()
-                print(f"    went back to {current_node}")
-            else:
-                current_node = g.start
-        print(path)
-        if current_node == g.end:
-            break
-        i += 1
-    return list(path)
+def find_all_paths(adj_list: list[list[int]], g: Graph) -> list[list[int]]:
+    visited_nodes = set()
+    valid_path: list[list[int]] = []
+    curr_path: list[int] = []
+    curr_node = g.start
+    return None
 
 
 def get_adjacency_list(edges: dict[int, Edge],
@@ -90,11 +47,65 @@ def find_paths_1(g: Graph) -> list[int]:
     adj_list = get_adjacency_list(g.edges, size)
     visited_nodes = set()
     visited_edges = set()
-    possible_paths = []
-    for _ in range(3):
-        p = find_one_path(adj_list, g)
-        visited_nodes = visited_nodes.union(p)
-        possible_paths.append(p)
-        print(f"Path:     {p}")
-        print(f"v nodes: {visited_nodes}")
-    return possible_paths
+    possible_paths: list[list[int]] = find_all_paths(adj_list, g)
+    print(f"Paths found : ")
+    # print("\n".join([", ".join(p) for path in possible_paths for p in path]))
+    for path in possible_paths:
+        print(", ".join([str(p) for p in path]))
+    shortest_path = min(possible_paths, key=len)
+    return shortest_path
+
+
+
+
+
+"""
+def find_one_path(adj_list: list[list[int]], g: Graph) -> list[int]:
+    path = []
+    v_nodes = set()
+    current_node = g.start
+    path.append(current_node)
+    v_nodes.add(current_node)
+    i = 0
+    iters = 100
+    while i < iters:
+        # print(f"current node is : {current_node}")
+        possible = []
+        prioritized = []
+        next_node = -1
+        # print(f" - > {adj_list[current_node]} | ", end='')
+        if len(adj_list[current_node]) >= 1:
+            for neighbor in adj_list[current_node]:
+                if neighbor not in path and neighbor not in v_nodes:
+                    if g.nodes[neighbor].zone.value == 'priority':
+                        prioritized.append(neighbor)
+                    elif g.nodes[neighbor].zone.value != 'blocked':
+                        possible.append(neighbor)
+            # print(f"  possible {possible} | ", end='')
+            # print(f"  priority {prioritized}")
+            if prioritized:
+                next_node = random.choice(prioritized)
+            elif possible:
+                if v_nodes:
+                    list_difference(possible, list(v_nodes))
+                next_node = random.choice(possible)
+        else:
+            next_node = adj_list[current_node][0]
+        if next_node != -1:
+            #print(f"    next is {next_node}")
+            current_node = next_node
+            path.append(next_node)
+            v_nodes.add(next_node)
+        else:
+            if len(path) > 1:
+                path.pop()
+                current_node = path.pop()
+                # print(f"    went back to {current_node}")
+            else:
+                current_node = g.start
+        # print(path)
+        if current_node == g.end:
+            break
+        i += 1
+    return list(path)
+"""

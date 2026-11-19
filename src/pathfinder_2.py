@@ -3,6 +3,12 @@ from typing import Deque
 from .models import Graph, Node, Edge
 
 
+def print_adj_list(adj_list, size) -> None:
+    for i in range(size):
+        print(f"{i}: ", end='')
+        print(', '.join(str(a) for a in adj_list[i]))
+
+
 def bfs(adj_list: list[list[int]], nodes: dict[int, Node],
         start: int, size: int) -> tuple[list[int], list[float]]:
     """Iterate through the graph grid to find the distance between the nodes
@@ -29,18 +35,21 @@ def bfs(adj_list: list[list[int]], nodes: dict[int, Node],
         # Explore all the neighbors of the current node
         for neighbor in adj_list[node]:
             # Check if the neighboring node is not visited
-            if dist[neighbor] == 1e9:
+            if (dist[neighbor] == 1e9):
                 # Mark the current node as the parent of
                 # the neighboring node
-                if nodes[neighbor].zone.value != 'blocked':
-                    parent[neighbor] = node
-                else:
-                    parent[neighbor] = -1
+                parent[neighbor] = node
                 # Mark the distance of the neighboring
                 # node as distance of the current node + 1
                 dist[neighbor] = dist[node] + 1
                 # Insert the neighboring node to the queue
                 q.append(neighbor)
+            # Check if the neighboring node is a priority node
+            # which has been visited
+            elif (nodes[neighbor].zone.value == 'priority'):
+                # Set the neihboring node as the parent of the current node 
+                parent[node] = neighbor
+                print(f"{neighbor} is the parent of {node}")
     return parent, dist
 
 
@@ -59,6 +68,7 @@ def shortest_distance(adj_list: list[list[int]], nodes: dict[int, Node],
         a list with the indexes of the nodes comprising the shortest
         path, from end to start.
     """
+    print_adj_list(adj_list, size)
     parent, dist = bfs(adj_list, nodes, start, size)
     print(f"        ", end='')
     print('  '.join([f"{a:02}" for a in nodes.keys()]))
@@ -71,15 +81,11 @@ def shortest_distance(adj_list: list[list[int]], nodes: dict[int, Node],
             "The start and end nodes could not be connected to each other"
         )
     path = []
-    currentNode = start
-    path.append(start)
-    neighbors = []
-    for i in range(size):
-        if currentNode == parent[i]:
-            neighbors.append(i)
-    print(neighbors)
-    # for n in neighbors:
-    #     if nodes[n].zone.value == 'priority':
+    currentNode = end
+    path.append(end)
+    while parent[currentNode] != -2:
+        path.append(parent[currentNode])
+        currentNode = parent[currentNode]
     return path
 
 
@@ -103,7 +109,7 @@ def get_adjacency_list(edges: dict[int, Edge],
     return adl
 
 
-def find_paths_2(g: Graph) -> list[int]:
+def find_paths(g: Graph) -> list[int]:
     """Return the shortest path between the start and end nodes."""
     size = len(g.nodes)
     adj_list = get_adjacency_list(g.edges, size)

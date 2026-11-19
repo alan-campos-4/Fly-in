@@ -27,7 +27,6 @@ class ParserError(Exception):
 
     def get_message(self) -> str:
         """Return the full message to display when an error is produced."""
-
         endstr = (f"An error was found in file '{self.filename}' ")
         if self.linenum == -1:
             endstr += "after reading the file"
