@@ -1,8 +1,7 @@
 from .models import Graph
 from .parser import get_data_from_file
 from .parser_error import ParserError
-from .pathfinder import get_adjacency_list, bfs, PathFindingError
-from .pathfinder_2 import find_paths
+from .pathfinder import find_paths, get_adjacency_list, bfs, PathFindingError
 from .travel import travel
 
 

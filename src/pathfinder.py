@@ -1,6 +1,13 @@
 from collections import deque
 from typing import Deque
-from .models import Graph, Edge
+import random
+from .models import Graph, Node, Edge
+
+
+def print_adj_list(adj_list, size) -> None:
+    for i in range(size):
+        print(f"{i}: ", end='')
+        print(', '.join(str(a) for a in adj_list[i]))
 
 
 class PathFindingError(Exception):
@@ -8,7 +15,7 @@ class PathFindingError(Exception):
         self.message = message
 
 
-def bfs(adj_list: list[list[int]],
+def bfs(adj_list: list[list[int]], nodes: dict[int, Node],
         start: int, size: int) -> tuple[list[int], list[float]]:
     """Iterate through the graph grid to find the distance between the nodes
     and the parent of each node applying the Breadth First Search algorithm.
@@ -22,7 +29,7 @@ def bfs(adj_list: list[list[int]],
         parent: a list containing the parent of each node.
         dist:   a list containing the distance of each node to the start.
     """
-    parent = [-1] * size
+    parent = [-2] * size
     dist = [1e9] * size
     dist[start] = 0
     q: Deque = deque()
@@ -31,25 +38,31 @@ def bfs(adj_list: list[list[int]],
     while q:
         # Pop the node at the front of the queue
         node = q.popleft()
-        # Explore all the neighbours of the current node
-        for neighbour in adj_list[node]:
-            # Check if the neighbouring node is not visited
-            if dist[neighbour] == 1e9:
+        # Explore all the neighbors of the current node
+        for neighbor in adj_list[node]:
+            # Check if the neighboring node is not visited
+            if (dist[neighbor] == 1e9):
                 # Mark the current node as the parent of
-                # the neighbouring node
-                parent[neighbour] = node
-                # Mark the distance of the neighbouring
+                # the neighboring node
+                parent[neighbor] = node
+                # Mark the distance of the neighboring
                 # node as distance of the current node + 1
-                dist[neighbour] = dist[node] + 1
-                # Insert the neighbouring node to the queue
-                q.append(neighbour)
+                dist[neighbor] = dist[node] + 1
+                # Insert the neighboring node to the queue
+                q.append(neighbor)
+            # Check if the neighboring node is a priority node
+            # which has been visited
+            elif (nodes[neighbor].zone.value == 'priority'):
+                # Set the neihboring node as the parent of the current node 
+                parent[node] = neighbor
+                # print(f"{neighbor} is the parent of {node}")
     return parent, dist
 
 
-def shortest_distance(adj_list: list[list[int]],
+def shortest_distance(adj_list: list[list[int]], nodes: dict[int, Node],
                       start: int, end: int, size: int) -> list[int]:
-    """Create a list containing the path with the shortest distance
-    between the start and end nodes given.
+    """Create a list of nodes indexes describing the shortest distance
+    from end to the start nodes given.
 
     Args:
         adj_list:   the adjancency list of the graph.
@@ -60,8 +73,18 @@ def shortest_distance(adj_list: list[list[int]],
     Returns:
         a list with the indexes of the nodes comprising the shortest
         path, from end to start.
+
+    Raises:
+
     """
-    parent, dist = bfs(adj_list, start, size)
+    # print_adj_list(adj_list, size)
+    parent, dist = bfs(adj_list, nodes, start, size)
+    """print(f"        ", end='')
+    print('  '.join([f"{a:02}" for a in nodes.keys()]))
+    print(f"Parent: ", end='')
+    print(', '.join([f"{a:02}" for a in parent]))
+    print(f"dist:   ", end='')
+    print(', '.join([f"{a:02}" for a in dist]))"""
     if dist[end] == 1e9:
         raise PathFindingError(
             "The start and end nodes could not be connected to each other"
@@ -69,18 +92,19 @@ def shortest_distance(adj_list: list[list[int]],
     path = []
     currentNode = end
     path.append(end)
-    while parent[currentNode] != -1:
+    while parent[currentNode] != -2:
         path.append(parent[currentNode])
         currentNode = parent[currentNode]
     return path
 
 
-def get_adjacency_list(edges: dict[int, Edge],
+def get_adjacency_list(nodes: dict[int, Node], edges: dict[int, Edge],
                        size: int) -> list[list[int]]:
-    """Return the adjacency list based on the edges of the graph.
+    """Return the adjacency list based on the nodes and edges of the graph.
 
     Args:
-        edges:  the edge list from the graph
+        nodes:  the graphs' nodes.
+        edges:  the graph's edges.
         size:   the number of node in the graph
 
     Return:
@@ -90,182 +114,81 @@ def get_adjacency_list(edges: dict[int, Edge],
     """
     adl: list[list[int]] = [[] for _ in range(size)]
     for edge in edges.values():
-        adl[edge.node_a].append(edge.node_b)
-        adl[edge.node_b].append(edge.node_a)
+        zone_a = nodes[edge.node_a].zone.value
+        zone_b = nodes[edge.node_b].zone.value
+        if zone_a != 'blocked' and zone_b != 'blocked':
+            adl[edge.node_a].append(edge.node_b)
+            adl[edge.node_b].append(edge.node_a)
     return adl
 
 
-def find_paths(g: Graph) -> list[int]:
-    """Return the shortest path between the start and end nodes."""
+def remove_edge(adj_list: list[list[int]], path: list[int]) -> None:
+    """Select two random nodes of the given path and delete their
+    connected positions in the adjacency list, effectively removing an edge.
+
+    Args:
+        adj_list:   the adjacency list of a Graph.
+        path:       the path from which the random node is selected.
+
+    Returns:
+        a new adjancency list with and 'edge' removed.
+    """
+    new_a = adj_list.copy()
+    index = random.randint(0, len(path) - 2)
+    node_a = path[index]
+    node_b = path[index + 1]
+    print(node_a, node_b)
+    new_a[node_a].remove(node_b)
+    new_a[node_b].remove(node_a)
+    return new_a
+
+
+def check_edge_remove(adj_list: list[list[int]]) -> dict[int, list[int]]:
+    """Check if the adjancency list contains nodes whose edges can be
+    removed without making a path impossible.
+
+    Args:
+        adj_list:   the adjacency list of a Graph.
+
+    Returns:
+        a dict containing the indexes of nodes with 3 or more edges,
+            as well as said edges.
+    """
+    removable = {}
+    for i in range(len(adj_list)):
+        if len(adj_list[i]) >= 3:
+            removable.update({i: adj_list[i]})
+    return removable
+
+
+def find_paths(g: Graph) -> list[list[int]]:
+    """
+    Find the shortest path between the start and end nodes.
+    Once found, modify the adjacency list to attempt to find an alternate
+    path of similar length.
+
+    Returns:
+        a set containing a series of paths between the start and end nodes.
+    """
+    valid_paths = []
     size = len(g.nodes)
-    adj_list = get_adjacency_list(g.edges, size)
-    path = shortest_distance(adj_list, g.start, g.end, size)
-    return list(reversed(path))
-
-
-"""
-print("Edge list")
-print('\n'.join(f"({n1}, {n2})" for n1,n2,l in g.edges))
-print()
-print("Adjacency list")
-print('\n'.join(f"{i}: {g}" for i, g in enumerate(adj_list)))
-print()
-print("Path")
-print(','.join(f"{p}" for p in path))
-"""
-
-
-"""
-    # ====================
-    # WIKIPEDIA HEAP
-    # ====================
-
-    source: str = g.start
-    dist: dict[str, float] = {}
-    prev: dict[str, str] = {}
-    Q = FibonacciHeap()
-
-    dist[source] = 0
-    Q.insert(source, 0)
-
-    for v in g.nodes.keys():
-        if v != source:
-            prev[v] = ""
-            dist[v] = float('inf')
-            Q.insert(v, float('inf'))
-
-    while not Q.is_empty():
-        u = Q.extract_min()
-        l = g.get_neighbors(u)
-        print("For ",u," -> ",l)
-
-        for v in l:
-            alt = dist[u] # + Graph.Distance(u,v)
-            if alt < dist[v]:
-                prev[v] = u
-                dist[v] = alt
-                Q.decrease_key(v, alt)
-
-    return dist
-"""
-
-
-"""
-    # ====================
-    # WIKIPEDIA BASIC
-    # ====================
-
-    dist: dict[str, float] = {}
-    prev: dict[str, str] = {}
-    heap: list[str] = []
-    S: list[str] = []
-
-    for name, node in g.nodes.items():
-        dist[name] = float('inf')
-        prev[name] = ""
-        heappush(heap, name)
-    dist[g.start] = 0
-
-    while len(heap):
-        u = heappop(heap)
-        for e1, e2, l in g.edges:
-            alt = dist[e1] + 1
-            if alt < dist[e2]:
-                dist[e2] = alt
-                prev[e2] = e1
-
-    un: str = g.end
-    if prev[un] or un == g.start:
-        while un:
-            S.append(un)
-            un = prev[un]
-"""
-
-"""
-    # ====================
-    # ADJ MATRIX
-    # ====================
-
-class Path:
-    def __init__(self, g: Graph):
-        self.names = g.nodes.keys()
-        self.vertices = len(g.nodes)
-        self.start = g.start
-        self.matrix = {}
-        for name in g.nodes.keys():
-            inner = {}
-            for name1 in g.nodes.keys():
-                inner.update({name1: 0})
-            self.matrix.update({name: inner})
-        for n1, n2, l in g.edges:
-            self.add_edge(n1, n2, l)
-
-    def add_edge(self, source: str, destination: str, weight: int):
-        self.matrix[source][destination] = weight
-        self.matrix[destination][source] = weight
-
-    def get_minimum_vertex(self, spt, distance):
-        min_key = float('inf')
-        vertex = -1
-        for i in self.names:
-            if not spt[i] and min_key > distance[i]:
-                min_key = distance[i]
-                vertex = i
-        return vertex
-
-    def dijkstra_get_min_distances(self):
-        source_vertex = self.start
-        spt = {name: False for name in self.names} # [False] * self.vertices
-        distance = {name: float('inf') for name in self.names}
-
-        # Start from the source vertex
-        distance[source_vertex] = 0
-
-        # Create SPT
-        for _ in self.names:
-            vertex_u = self.get_minimum_vertex(spt, distance)
-            spt[vertex_u] = True
-
-            for vertex_v in self.names:
-                if self.matrix[vertex_u][vertex_v] > 0:
-                    if (not spt[vertex_v] and
-                            self.matrix[vertex_u][vertex_v] != float('inf')):
-                        new_key = (self.matrix[vertex_u][vertex_v]
-                                   + distance[vertex_u])
-                        if new_key < distance[vertex_v]:
-                            distance[vertex_v] = new_key
-        # Print shortest path tree
-        self.print_dijkstra(source_vertex, distance)
-
-    def print_dijkstra(self, source_vertex, key):
-        print("Dijkstra Algorithm: (Adjacency Matrix)")
-        for i in self.names:
-            print(f"Source Vertex: {source_vertex} to vertex {i}"
-                  f" distance: {key[i]}")
-"""
-
-"""
-    # ====================
-    # ADJ_MARTRIX 2
-    # ====================
-
-void dijkstra(int graph[V][V], int start) {
-    int dist[V];
-    bool sptSet[V];
-    for (int i = 0; i < V; i++) {
-        dist[i] = INT_MAX;
-        sptSet[i] = false;
-    }
-    dist[start] = 0;
-    for (int count = 0; count < V - 1; count++) {
-        int u = minDistance(dist, sptSet);
-        sptSet[u] = true;
-        for (int v = 0; v < V; v++) {
-            if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX &&
-                   dist[u] + graph[u][v] < dist[v]) {
-                dist[v] = dist[u] + graph[u][v];
-            }
-        }
-    }
-}
-"""
+    adj_list = get_adjacency_list(g.nodes, g.edges, size)
+    path = shortest_distance(adj_list, g.nodes, g.start, g.end, size)
+    path.reverse()
+    print(path)
+    valid_paths.append(path)
+    removable_nodes = check_edge_remove(adj_list)
+    while removable_nodes:
+        node_a = random.choice(list(removable_nodes.keys()))
+        node_b = random.choice(removable_nodes[node_a])
+        adj_list[node_a].remove(node_b)
+        adj_list[node_b].remove(node_a)
+        try:
+            new_path = shortest_distance(adj_list, g.nodes,
+                                         g.start, g.end, size)
+            new_path.reverse()
+            valid_paths.append(path)
+        except PathFindingError:
+            adj_list[node_a].append(node_b)
+            adj_list[node_b].append(node_a)
+    return valid_paths

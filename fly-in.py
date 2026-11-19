@@ -5,8 +5,7 @@ import argparse
 import traceback
 from src import (
     Graph, ParserError, PathFindingError,
-    get_data_from_file, find_paths, find_paths_1, find_paths_2,
-    travel
+    get_data_from_file, find_paths, travel
 )
 
 
@@ -69,8 +68,10 @@ def main() -> None:
         exit(1)
     try:
         g: Graph = get_data_from_file(filename)
-        find_paths(g)
-        print(f"\nPath: {path}")
+        paths = find_paths(g)
+        print(f"\nPaths: ")
+        for path in paths:
+            print(path)
         # travel(g, path)
         g.visualize()
     except OSError as e:
