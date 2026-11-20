@@ -20,6 +20,8 @@
 
 #### Pathfinding limitations
 
+The adjacency list needs to be a list of sets. In the pathfinding algorithm is implemented with a list of lists, numbers are prone to dissapearing or being replaced. idk.
+
 Blocked zones: nodes marked with this zonetype are removed from the adjancency list before pathfinding starts, thus preventing them from being used in the algorithm.
 
 Priority zones: nodes marked with this zonetype are checked during pathfinding and assigned as the parent of a node when appropiate

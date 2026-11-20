@@ -7,7 +7,10 @@ from .models import Graph, Node, Edge
 def print_adj_list(adj_list, size) -> None:
     for i in range(size):
         print(f"{i}: ", end='')
-        print(', '.join(str(a) for a in adj_list[i]))
+        for a in adj_list[i]:
+            print(f"{a}, ", end='')
+        print()
+        #print(', '.join(str(a) for a in adj_list[i]))
 
 
 class PathFindingError(Exception):
@@ -62,7 +65,7 @@ def bfs(adj_list: list[list[int]], nodes: dict[int, Node],
 def shortest_distance(adj_list: list[list[int]], nodes: dict[int, Node],
                       start: int, end: int, size: int) -> list[int]:
     """Create a list of nodes indexes describing the shortest distance
-    from end to the start nodes given.
+    from start to the end nodes given.
 
     Args:
         adj_list:   the adjancency list of the graph.
@@ -72,7 +75,7 @@ def shortest_distance(adj_list: list[list[int]], nodes: dict[int, Node],
 
     Returns:
         a list with the indexes of the nodes comprising the shortest
-        path, from end to start.
+        path, from start to end.
 
     Raises:
 
@@ -95,6 +98,7 @@ def shortest_distance(adj_list: list[list[int]], nodes: dict[int, Node],
     while parent[currentNode] != -2:
         path.append(parent[currentNode])
         currentNode = parent[currentNode]
+    path.reverse()
     return path
 
 
@@ -122,73 +126,111 @@ def get_adjacency_list(nodes: dict[int, Node], edges: dict[int, Edge],
     return adl
 
 
-def remove_edge(adj_list: list[list[int]], path: list[int]) -> None:
-    """Select two random nodes of the given path and delete their
-    connected positions in the adjacency list, effectively removing an edge.
-
-    Args:
-        adj_list:   the adjacency list of a Graph.
-        path:       the path from which the random node is selected.
-
-    Returns:
-        a new adjancency list with and 'edge' removed.
-    """
-    new_a = adj_list.copy()
-    index = random.randint(0, len(path) - 2)
-    node_a = path[index]
-    node_b = path[index + 1]
-    print(node_a, node_b)
-    new_a[node_a].remove(node_b)
-    new_a[node_b].remove(node_a)
-    return new_a
-
-
-def check_edge_remove(adj_list: list[list[int]]) -> dict[int, list[int]]:
+def check_edge_remove(adj_list: list[list[int]],
+                      start: int, end: int,
+                      size: int) -> dict[int, list[int]]:
     """Check if the adjancency list contains nodes whose edges can be
-    removed without making a path impossible.
+    removed without making a path impossible. The minium amount of edges
+    is 2 for the start and end nodes, and 3 for the rest.
 
     Args:
-        adj_list:   the adjacency list of a Graph.
+        adj_list:   the adjacency list of the Graph.
+        start:      the Graph's start node.
+        end:        the Graph's end node.
+        size:       the number of nodes in the Graph.
 
     Returns:
-        a dict containing the indexes of nodes with 3 or more edges,
-            as well as said edges.
+        a dict containing the indexes of nodes with the minimum number
+            of edges, as well as said edges.
     """
     removable = {}
-    for i in range(len(adj_list)):
-        if len(adj_list[i]) >= 3:
-            removable.update({i: adj_list[i]})
+    for i in range(size):
+        neighbors = adj_list[i]
+        if i == start or i == end:
+            if len(neighbors) >= 2:
+                removable.update({i: neighbors})
+        else:
+            if len(neighbors) >= 3:
+                removable.update({i: neighbors})
     return removable
+
+
+def path_is_new(paths: list[list[int]], new_path: list[int]) -> bool:
+    for path in paths:
+        if path == new_path:
+            return False
+    return True
 
 
 def find_paths(g: Graph) -> list[list[int]]:
     """
     Find the shortest path between the start and end nodes.
-    Once found, modify the adjacency list to attempt to find an alternate
-    path of similar length.
+    Once found, it will enter a loop to try to find alternate paths.
 
     Returns:
         a set containing a series of paths between the start and end nodes.
+
+    Raises:
+        PathFindingError:   if the Graph is not solvable.
     """
     valid_paths = []
+    nodes = g.nodes
+    start = g.start
+    end = g.end
     size = len(g.nodes)
-    adj_list = get_adjacency_list(g.nodes, g.edges, size)
-    path = shortest_distance(adj_list, g.nodes, g.start, g.end, size)
-    path.reverse()
+    adj_list = get_adjacency_list(nodes, g.edges, size)
+    print()
+    path = shortest_distance(adj_list, nodes, start, end, size)
     print(path)
     valid_paths.append(path)
-    removable_nodes = check_edge_remove(adj_list)
-    while removable_nodes:
-        node_a = random.choice(list(removable_nodes.keys()))
-        node_b = random.choice(removable_nodes[node_a])
-        adj_list[node_a].remove(node_b)
-        adj_list[node_b].remove(node_a)
-        try:
-            new_path = shortest_distance(adj_list, g.nodes,
-                                         g.start, g.end, size)
-            new_path.reverse()
-            valid_paths.append(path)
-        except PathFindingError:
-            adj_list[node_a].append(node_b)
-            adj_list[node_b].append(node_a)
+    removable_edges = check_edge_remove(adj_list, start, end, size)
+    if removable_edges:
+        # Before the loop, randomly select a node.
+        node_a = random.choice(list(removable_edges.keys()))
+        adj_setlist = [set(a for a in item) for item in adj_list]
+        print(adj_list)
+        print("NEW")
+        while 1:
+            # At the start of the loop, randomly select one of the
+            # node's neighbors, and remove them both from the adj list.
+            node_b = (removable_edges[node_a])[-1]
+            print(f"\nfrom {removable_edges} | {removable_edges[node_a]}")
+            print(f"  try without: {node_a},{node_b}")
+            adj_setlist[node_a].remove(node_b)
+            adj_setlist[node_b].remove(node_a)
+            print_adj_list(adj_setlist, size)
+            # Try to find a new path with the reduced adj list.
+            # If the path is solvable and not redundant,
+            # add it to the valid paths.
+            try:
+                new_path = shortest_distance(adj_setlist, nodes,
+                                             start, end, size)
+                print(f"new path: {new_path}")
+                if path_is_new(valid_paths, new_path):
+                    valid_paths.append(new_path)
+                    print("solvable")
+                else:
+                    print("redundant")
+            # After checking if the new path is possible,
+            # restore the adj list to its previous state.
+            except PathFindingError:
+                print("not solvable")
+            adj_setlist[node_a].add(node_b)
+            adj_setlist[node_b].add(node_a)
+            print_adj_list(adj_setlist, size)
+            # First, remove the neighbor used.
+            # A new one will be selected at the start of the loop.
+            removable_edges[node_a].remove(node_b)
+            # If this leaves the node with no neighbors, remove the node.
+            #  If there are still other nodes in the dict, choose another.
+            #  If there are no more nodes, end the loop.
+            if not removable_edges[node_a]:
+                removable_edges.pop(node_a)
+                if removable_edges:
+                    node_a = random.choice(list(removable_edges.keys()))
+                else:
+                    break
+            print(f"  after changes: {removable_edges}")
+        print("...")
+        print_adj_list(adj_list, size)
     return valid_paths
