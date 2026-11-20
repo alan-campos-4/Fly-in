@@ -2,6 +2,7 @@
 
 import os
 import argparse
+import time
 import traceback
 from src import (
     Graph, ParserError, PathFindingError,
@@ -67,12 +68,19 @@ def main() -> None:
         print("No file was selected.")
         exit(1)
     try:
+        start = time.time()
         g: Graph = get_data_from_file(filename)
+        g_time = time.time()
+        print(f"Graph created in {(g_time - start):.6f} seconds")
         paths = find_paths(g)
+        p_time = time.time()
+        print(f"Path finding done in {(p_time - g_time):.6f} seconds")
+        m_time = time.time()
+        travel(g, paths)
+        print(f"Movement done in {(m_time - p_time):.6f} seconds")
         print(f"\nPaths: ")
         for path in paths:
             print(path)
-        # travel(g, path)
         g.visualize()
     except OSError as e:
         msg = str(e).split(':')[0].split(']')[1].strip()

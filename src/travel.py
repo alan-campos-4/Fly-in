@@ -79,18 +79,20 @@ def try_to_move(d: Drone, nodes: dict[int, Node], edges: dict[int, Edge],
         return False
 
 
-def travel(g: Graph, path: list[int]) -> None:
+def travel(g: Graph, paths: list[list[int]]) -> None:
     """
-    The drones will be stored in a dict of length nb_drones, in which
-    the key will be a number (0, nb_drones - 1), and the value will an
-    object containg the data for a Drone.
+    Create a list of drones of length nb_drones that will travel through
+    the Graph from the start to the end following the paths given.
 
-    The simulation starts after setting all the drones at the start.
+    The movement follows turn scheduling. In every turn, each drone tries
+    to move to its next node in its path. The drones that successfully move
+    are displayed in the output.
 
     Args:
         g:      the Graph object.
-        path:   a list with the indexes of all the nodes will go through.
+        paths:   a list with valid paths between the start and end nodes.
     """
+    path = paths[0]
     print(f"Path:  {path}")
     end = path[-1]
     drones = [Drone(ind=i, path=path) for i in range(g.nb_drones)]

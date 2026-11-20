@@ -10,15 +10,16 @@ if __name__ == "__main__":
     adj_list = [
         [1],
         [0, 2, 3],
+        [1],
         [1, 4],
-        [1, 4],
-        [2, 3]
+        [3, 5],
+        [4]
     ]
     adj_setlist = [set(a for a in item) for item in adj_list]
     size = len(adj_list)
 
     node_a = 1
-    node_b = 2
+    node_b = 0
     adj_setlist[node_a].remove(node_b)
     adj_setlist[node_b].remove(node_a)
     print_adj_list(adj_setlist, size)
@@ -26,8 +27,8 @@ if __name__ == "__main__":
     adj_setlist[node_b].add(node_a)
     print_adj_list(adj_setlist, size)
 
-    node_a = 2
-    node_b = 4
+    node_a = 1
+    node_b = 3
     adj_setlist[node_a].remove(node_b)
     adj_setlist[node_b].remove(node_a)
     print_adj_list(adj_setlist, size)
