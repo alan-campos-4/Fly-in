@@ -15,9 +15,11 @@ def find_edge_to_travel(edges: dict[int, Edge],
                         curr_node: int, next_node: int) -> int:
     """Return the index of the edge that connects the two nodes given."""
     for edge_ind, edge in edges.items():
-        if curr_node == edge.node_a and next_node == edge.node_b:
+        na = edge.node_a
+        nb = edge.node_b
+        if curr_node == na and next_node == nb:
             return edge_ind
-        elif curr_node == edge.node_b and next_node == edge.node_a:
+        elif curr_node == nb and next_node == na:
             return edge_ind
     return -1
 
@@ -25,13 +27,13 @@ def find_edge_to_travel(edges: dict[int, Edge],
 def is_node_available(nodes: dict[int, Node], node: int) -> bool:
     """Return True is the node given has enough space to let another
     drone travel to it."""
-    return nodes[node].max_drones - nodes[node].drones >= 1
+    return nodes[node].max_drones - nodes[node].curr_drones > 0
 
 
 def is_edge_traversable(edges: dict[int, Edge], edge: int) -> bool:
     """Return True if the edge given has enough capacity to let another
     drone travel through it."""
-    return edges[edge].max_link_capacity - edges[edge].occupancy >= 1
+    return edges[edge].max_link_capacity - edges[edge].occupancy > 0
 
 
 def try_to_move(d: Drone, nodes: dict[int, Node], edges: dict[int, Edge],
@@ -68,8 +70,8 @@ def try_to_move(d: Drone, nodes: dict[int, Node], edges: dict[int, Edge],
         d.previous_edge = edge_to_travel
         d.previous_node = d.current_node
         d.current_node = next_node
-        nodes[d.current_node].drones += 1
-        nodes[d.previous_node].drones -= 1
+        nodes[d.current_node].curr_drones += 1
+        nodes[d.previous_node].curr_drones -= 1
         if d.current_node == end:
             d.delivered = True
             edges[d.previous_edge].occupancy -= 1
@@ -96,17 +98,19 @@ def travel(g: Graph, paths: list[tuple[int, ...]]) -> None:
         return
     path = paths[0]
     end = path[-1]
+    nodes = g.nodes
+    edges = g.edges
     drones = [Drone(ind=i, path=path) for i in range(g.nb_drones)]
-    g.nodes[g.start].drones = g.nb_drones
+    nodes[g.start].curr_drones = g.nb_drones
 
     t = 1
     while 1:
-        print(f"\nTurn {t}")
+        print(f"Turn {t}")
         moved = []
         for d in drones:
-            if not d.delivered and try_to_move(d, g.nodes, g.edges, end):
+            if not d.delivered and try_to_move(d, nodes, edges, end):
                 moved.append(d)
-        display_drones(moved, g.nodes)
+        display_drones(moved, nodes)
         if t >= 25:
             break
         if all_finished(drones):

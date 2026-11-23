@@ -47,7 +47,6 @@ def bfs(adj_list: list[set[int]], nodes: dict[int, Node],
                 # Mark the current node as the parent of
                 # the neighboring node
                 parent[neighbor] = node
-                print(f"{neighbor} is the parent of {node}")
                 # Mark the distance of the neighboring
                 # node as distance of the current node + 1
                 dist[neighbor] = dist[node] + 1
@@ -82,12 +81,14 @@ def shortest_distance(adj_list: list[set[int]], nodes: dict[int, Node],
         PathFindingError: if end node could not be reached.
     """
     parent, dist = bfs(adj_list, nodes, start, size)
+    """
     print(f"        ", end='')
     print('  '.join([f"{a:02}" for a in nodes.keys()]))
     print(f"Parent: ", end='')
     print(', '.join([f"{a:02}" for a in parent]))
     print(f"dist:   ", end='')
     print(', '.join([f"{a:02}" for a in dist]))
+    """
     if dist[end] == 1e9:
         raise PathFindingError(
             "The start and end nodes could not be connected to each other"
@@ -95,9 +96,11 @@ def shortest_distance(adj_list: list[set[int]], nodes: dict[int, Node],
     path = []
     currentNode = end
     path.append(end)
-    while parent[currentNode] != -2:
+    i = 0
+    while parent[currentNode] != -2 and i < size:
         path.append(parent[currentNode])
         currentNode = parent[currentNode]
+        i += 1
     path.reverse()
     return tuple(path)
 
@@ -126,7 +129,7 @@ def get_adjacency_list(nodes: dict[int, Node], edges: dict[int, Edge],
     return adl
 
 
-def check_edge_remove(adj_list: list[set[int]],
+def check_edge_remove(adj_list: list[set[int]], nodes: dict[int, Node],
                       start: int, end: int,
                       size: int) -> dict[int, set[int]]:
     """Find any node in the adjancency list with removable edges.
@@ -155,7 +158,7 @@ def check_edge_remove(adj_list: list[set[int]],
     return removable
 
 
-def find_paths(g: Graph) -> list[tuple[int, ...]]:
+def find_paths(g: Graph) -> set[tuple[int, ...]]:
     """
     Find the shortest path between the start and end nodes.
     Once found, it will try to find alternate paths.
@@ -172,18 +175,17 @@ def find_paths(g: Graph) -> list[tuple[int, ...]]:
     Raises:
         PathFindingError:   if the Graph is not solvable.
     """
-    valid_paths = []
-    nodes = g.nodes
-    start = g.start
-    end = g.end
-    size = len(g.nodes)
+    valid_paths: set[tuple[int, ...]] = set()
+    nodes: dict[int, Node] = g.nodes
+    start: int = g.start
+    end: int = g.end
+    size: int = len(g.nodes)
     adj_list = get_adjacency_list(nodes, g.edges, size)
-    print_adj_list(adj_list, size)
+    # print_adj_list(adj_list, size)
     path = shortest_distance(adj_list, nodes, start, end, size)
-    valid_paths.append(path)
-    print(f"   p {path}")
+    valid_paths.add(path)
 
-    removable_edges = check_edge_remove(adj_list, start, end, size)
+    removable_edges = check_edge_remove(adj_list, nodes, start, end, size)
     if removable_edges:
         # Before the loop, randomly select a node.
         node_a = random.choice(list(removable_edges.keys()))
@@ -199,8 +201,8 @@ def find_paths(g: Graph) -> list[tuple[int, ...]]:
             try:
                 new_path = shortest_distance(adj_list, nodes,
                                              start, end, size)
-                if new_path not in valid_paths:
-                    valid_paths.append(new_path)
+                if len(new_path) < size:
+                    valid_paths.add(new_path)
             except PathFindingError:
                 pass
             # After checking if the new path is possible,
@@ -221,5 +223,7 @@ def find_paths(g: Graph) -> list[tuple[int, ...]]:
     # Sort the valid paths by length (shortest first);
     # excluding the first element, since that is the prefered one.
     if len(valid_paths) > 1:
-        valid_paths.sort(key=len)
-    return valid_paths
+        valid_list = list(valid_paths)
+        valid_list.sort(key=len)
+        return valid_list
+    return list(valid_paths)

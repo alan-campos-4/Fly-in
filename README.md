@@ -7,48 +7,46 @@
 </div>
 <br>
 
+
 ## Table of Contents
 
 1. [Description](#description)
 2. [Intructions](#instructions)
 3. [Resources](#resources)
 
----
+
 ## Description
 
 ...
 
 #### Pathfinding limitations
 
-Blocked zones: nodes marked with this zonetype are removed from the adjancency list before pathfinding starts, thus preventing them from being used in the algorithm.
+- **Blocked zones**: nodes marked with this zonetype are removed from the adjancency list before pathfinding starts, thus preventing them from being used in the algorithm.
 
-Priority zones: nodes marked with this zonetype are checked during pathfinding and assigned as the parent of a node when appropiate
+- **Priority zones**: nodes marked with this zonetype are checked during pathfinding and assigned as the parent of a node when appropiate
 
-Restricted zones:
-...
+- **Restricted zones**: ...
 
 #### Benchmarks
 
-| Map name | Shortest path (nodes) | Best Result (turns) |
-|--|--|--|
-| 01_linear_path.txt    | 4 | 4 |
-| 02_simple_fork.txt    | 4 | 6 |
-| 03_basic_capacity.txt | 4 | 4 |
-| 01_dead_end_trap.txt      | 5 | 8 |
-| 02_circular_loop.txt      | 5 | 9 |
-| 03_priority_puzzle.txt    | 7 | 13 |
-| 01_maze_nightmare.txt         | . | . |
-| 02_capacity_hell.txt          | . | . |
-| 03_ultimate_challenge.txt     | . | . |
-| 01_the_impossible_dream.txt   | . | . |
+|   | Map name | Shortest path (nodes) | Best Result (turns) |
+|---|---|---|---|
+| 0 | 01_linear_path.txt    | 4 | 4 |
+| 1 | 02_simple_fork.txt    | 4 | 6 |
+| 2 | 03_basic_capacity.txt | 4 | 4 |
+| 3 | 01_dead_end_trap.txt      | 5 | 8 |
+| 4 | 02_circular_loop.txt      | 5 | 9 |
+| 5 | 03_priority_puzzle.txt    | 5 | 5 |
+| 6 | 01_maze_nightmare.txt         |  7 | 13 |
+| 7 | 02_capacity_hell.txt          |  6 | 16 |
+| 8 | 03_ultimate_challenge.txt     | 13 | 25 |
+| 9 | 01_the_impossible_dream.txt   | 16 | 25 |
 
 
----
 ## Instructions
 
 ...
 
----
 ## Resources
 
 #### Guides
@@ -76,7 +74,6 @@ The AI chatbot Claude was used to resolve incedental problems and unexpected res
 
 # TODO
 
-- map >7 pathfindings
 - Restricted zones (2 turn edge)
 - Change between paths
 - Fill Readme

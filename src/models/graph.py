@@ -58,11 +58,9 @@ class Graph(BaseModel):
         self.visual.append(temp)
 
     def visualize(self) -> None:
-        opt = input("Visualize? (y/n): ")
-        if opt == 'y':
-            for edge in self.edges.values():
-                self.addEdge(edge.node_a, edge.node_b)
-            G = nx.Graph()
-            G.add_edges_from(self.visual)
-            nx.draw_networkx(G)
-            plt.show()
+        for edge in self.edges.values():
+            self.addEdge(edge.node_a, edge.node_b)
+        G = nx.Graph()
+        G.add_edges_from(self.visual)
+        nx.draw_networkx(G)
+        plt.show()

@@ -13,12 +13,13 @@ from src import (
 def arguments() -> argparse.Namespace:
     """Parse the arguments received through the command line.
 
-        map_file:   the index for a map file.
-        log:        whether to display the time taken between operations.
+    - map_file:   the index for a map file.
+    - log:        whether to display the time taken between operations.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--map_file", default=-1)
-    parser.add_argument("--log", default=False)
+    parser.add_argument("--map_file", default=None)
+    parser.add_argument("--log", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--visual", action=argparse.BooleanOptionalAction)
     return parser.parse_args()
 
 
@@ -44,7 +45,7 @@ def menu(map_file: int) -> str | None:
     }
     opt: int
     try:
-        if map_file != -1:
+        if map_file:
             opt = int(map_file)
         else:
             for key, name in options.items():
@@ -63,18 +64,18 @@ def menu(map_file: int) -> str | None:
 
 
 def time_passed(msg: str, prev_time: float) -> float:
+    """Return the time passed and display a message."""
     curr_time = time.time()
-    print(f"{msg} in {(curr_time - prev_time):.6f} seconds")
+    print(f"{msg} done in {(curr_time - prev_time):.6f} seconds")
     return curr_time
 
 
 def main() -> None:
     args = arguments()
     filename = menu(args.map_file)
-    print()
     if not filename:
         print("No file was selected.")
-        exit(1)
+        exit()
     try:
         if args.log:
             curr_time = time.time()
@@ -82,7 +83,7 @@ def main() -> None:
         if args.log:
             # t_graph = time.time()
             # print(f"Graph created in {(t_graph - t_start):.6f} seconds")
-            curr_time = time_passed("Graph created", curr_time)
+            curr_time = time_passed("Graph creation", curr_time)
         paths = find_paths(g)
         if args.log:
             # t_path = time.time()
@@ -90,11 +91,12 @@ def main() -> None:
             curr_time = time_passed("Path finding", curr_time)
             print("\nPaths: ")
             for path in paths:
-                print(path)
+                print(f"{path}  [{len(path)}]")
         travel(g, paths)
         if args.log:
             curr_time = time_passed("Movement", curr_time)
-        g.visualize()
+        if args.visual:
+            g.visualize()
     except OSError as e:
         msg = str(e).split(':')[0].split(']')[1].strip()
         print(f"An error occured with the file '{filename}': {msg}.")
