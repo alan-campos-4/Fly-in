@@ -58,8 +58,9 @@ Restricted zones:
 
 #### Documentation
 
-- [Dijkstra's_algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm/)
 - [uv documentation](https://docs.astral.sh/uv/)
+- [Dijkstra's_algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm/)
+- [Difference Between List and Tuple in Python](https://www.geeksforgeeks.org/python/python-difference-between-list-and-tuple/)
 
 #### Projects
 

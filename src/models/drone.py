@@ -16,7 +16,7 @@ class Drone(BaseModel):
         delivered:      True if this drone has arrived at the end node.
     """
     ind: int
-    path: list[int] = []
+    path: tuple[int, ...]
     current_node: int = Field(default=0)
     previous_node: int = Field(default=-1)
     previous_edge: int = Field(default=-1)

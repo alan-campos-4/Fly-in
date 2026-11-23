@@ -14,10 +14,11 @@ def arguments() -> argparse.Namespace:
     """Parse the arguments received through the command line.
 
         map_file:   the index for a map file.
-        pathfinder: the index for the algorithm used for pathfinding.
+        log:        whether to display the time taken between operations.
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--map_file", default=-1)
+    parser.add_argument("--log", default=False)
     return parser.parse_args()
 
 
@@ -41,14 +42,15 @@ def menu(map_file: int) -> str | None:
         9: "challenger/01_the_impossible_dream.txt",
         10: "test.txt"
     }
+    opt: int
     try:
         if map_file != -1:
-            opt: int = int(map_file)
+            opt = int(map_file)
         else:
             for key, name in options.items():
                 print(f" {key} - {name}")
             opt_str: str = input("Select an option: ")
-            opt: int = int(opt_str)
+            opt = int(opt_str)
     except ValueError:
         print("Invalid input.")
     else:
@@ -60,6 +62,12 @@ def menu(map_file: int) -> str | None:
     return None
 
 
+def time_passed(msg: str, prev_time: float) -> float:
+    curr_time = time.time()
+    print(f"{msg} in {(curr_time - prev_time):.6f} seconds")
+    return curr_time
+
+
 def main() -> None:
     args = arguments()
     filename = menu(args.map_file)
@@ -68,19 +76,24 @@ def main() -> None:
         print("No file was selected.")
         exit(1)
     try:
-        start = time.time()
+        if args.log:
+            curr_time = time.time()
         g: Graph = get_data_from_file(filename)
-        g_time = time.time()
-        print(f"Graph created in {(g_time - start):.6f} seconds")
+        if args.log:
+            # t_graph = time.time()
+            # print(f"Graph created in {(t_graph - t_start):.6f} seconds")
+            curr_time = time_passed("Graph created", curr_time)
         paths = find_paths(g)
-        p_time = time.time()
-        print(f"Path finding done in {(p_time - g_time):.6f} seconds")
-        m_time = time.time()
+        if args.log:
+            # t_path = time.time()
+            # print(f"Path finding done in {(t_path - t_graph):.6f} seconds")
+            curr_time = time_passed("Path finding", curr_time)
+            print("\nPaths: ")
+            for path in paths:
+                print(path)
         travel(g, paths)
-        print(f"Movement done in {(m_time - p_time):.6f} seconds")
-        print(f"\nPaths: ")
-        for path in paths:
-            print(path)
+        if args.log:
+            curr_time = time_passed("Movement", curr_time)
         g.visualize()
     except OSError as e:
         msg = str(e).split(':')[0].split(']')[1].strip()

@@ -10,3 +10,14 @@ found.add(40)
 print(found)
 missing = should_have.difference(found)
 print(missing)
+
+
+print()
+print()
+print()
+
+
+set_of_tuples = set()
+set_of_tuples.add(tuple([0, 9, 8, 2, 1, 9]))
+set_of_tuples.add(tuple([0, 3, 4, 2, 1, 9]))
+print(set_of_tuples)

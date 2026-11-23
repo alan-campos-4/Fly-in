@@ -367,5 +367,6 @@ def get_data_from_file(filepath: str) -> Graph:
     try:
         g = Graph.model_validate(filedata)
     except ValidationError as exc:
-        raise ParserError.process_error(filepath, -1, exc)
+        pm = ParserMessage.process_error(exc)
+        raise ParserError(filepath, -1, pm.message)
     return g

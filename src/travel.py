@@ -55,7 +55,7 @@ def try_to_move(d: Drone, nodes: dict[int, Node], edges: dict[int, Edge],
         end:    the graph's end node.
 
     Returns:
-        True, if the drone has successfuly moved to the next node. 
+        True, if the drone has successfuly moved to the next node.
     """
     next_node = d.get_next_node()
     next_node_av = is_node_available(nodes, next_node)
@@ -79,7 +79,7 @@ def try_to_move(d: Drone, nodes: dict[int, Node], edges: dict[int, Edge],
         return False
 
 
-def travel(g: Graph, paths: list[list[int]]) -> None:
+def travel(g: Graph, paths: list[tuple[int, ...]]) -> None:
     """
     Create a list of drones of length nb_drones that will travel through
     the Graph from the start to the end following the paths given.
@@ -92,8 +92,9 @@ def travel(g: Graph, paths: list[list[int]]) -> None:
         g:      the Graph object.
         paths:   a list with valid paths between the start and end nodes.
     """
+    if not paths:
+        return
     path = paths[0]
-    print(f"Path:  {path}")
     end = path[-1]
     drones = [Drone(ind=i, path=path) for i in range(g.nb_drones)]
     g.nodes[g.start].drones = g.nb_drones
@@ -106,9 +107,8 @@ def travel(g: Graph, paths: list[list[int]]) -> None:
             if not d.delivered and try_to_move(d, g.nodes, g.edges, end):
                 moved.append(d)
         display_drones(moved, g.nodes)
-        if t >= 20:
+        if t >= 25:
             break
         if all_finished(drones):
-            print("All finished")
             break
         t += 1
