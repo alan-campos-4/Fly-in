@@ -11,4 +11,4 @@ set_of_tuples.add(tuple([0, 6, 5, 3, 4, 1, 9]))
 if len(set_of_tuples) > 2:
     li = list(set_of_tuples)
     li.sort(key=len)
-    print(li)
+    print(set(li))

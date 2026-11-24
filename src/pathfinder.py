@@ -31,7 +31,7 @@ def bfs(adj_list: list[set[int]], nodes: dict[int, Node],
         parent: a list containing the parent of each node.
         dist:   a list containing the distance of each node to the start.
     """
-    parent = [-2] * size
+    parent = [-1] * size
     dist = [1e9] * size
     dist[start] = 0
     q: Deque = deque()
@@ -97,7 +97,7 @@ def shortest_distance(adj_list: list[set[int]], nodes: dict[int, Node],
     currentNode = end
     path.append(end)
     i = 0
-    while parent[currentNode] != -2 and i < size:
+    while parent[currentNode] != -1 and i < size:
         path.append(parent[currentNode])
         currentNode = parent[currentNode]
         i += 1
@@ -145,8 +145,8 @@ def check_edge_remove(adj_list: list[set[int]], nodes: dict[int, Node],
         size:       the number of nodes in the Graph.
 
     Returns:
-        a dict containing the of the nodes whose edges can
-            be removed, and their neighboring nodes.
+        a dict containing the of the nodes whose edges can be
+            removed, and their neighboring nodes.
     """
     removable = {}
     for i in range(size):
@@ -158,7 +158,7 @@ def check_edge_remove(adj_list: list[set[int]], nodes: dict[int, Node],
     return removable
 
 
-def find_paths(g: Graph) -> set[tuple[int, ...]]:
+def find_paths(g: Graph) -> list[tuple[int, ...]]:
     """
     Find the shortest path between the start and end nodes.
     Once found, it will try to find alternate paths.
@@ -175,7 +175,7 @@ def find_paths(g: Graph) -> set[tuple[int, ...]]:
     Raises:
         PathFindingError:   if the Graph is not solvable.
     """
-    valid_paths: set[tuple[int, ...]] = set()
+    valid_paths: list[tuple[int, ...]] = []
     nodes: dict[int, Node] = g.nodes
     start: int = g.start
     end: int = g.end
@@ -183,7 +183,7 @@ def find_paths(g: Graph) -> set[tuple[int, ...]]:
     adj_list = get_adjacency_list(nodes, g.edges, size)
     # print_adj_list(adj_list, size)
     path = shortest_distance(adj_list, nodes, start, end, size)
-    valid_paths.add(path)
+    valid_paths.append(path)
 
     removable_edges = check_edge_remove(adj_list, nodes, start, end, size)
     if removable_edges:
@@ -201,8 +201,8 @@ def find_paths(g: Graph) -> set[tuple[int, ...]]:
             try:
                 new_path = shortest_distance(adj_list, nodes,
                                              start, end, size)
-                if len(new_path) < size:
-                    valid_paths.add(new_path)
+                if new_path not in valid_paths and len(new_path) <= size:
+                    valid_paths.append(new_path)
             except PathFindingError:
                 pass
             # After checking if the new path is possible,
@@ -220,10 +220,4 @@ def find_paths(g: Graph) -> set[tuple[int, ...]]:
                     node_a = random.choice(list(removable_edges.keys()))
                 else:
                     break
-    # Sort the valid paths by length (shortest first);
-    # excluding the first element, since that is the prefered one.
-    if len(valid_paths) > 1:
-        valid_list = list(valid_paths)
-        valid_list.sort(key=len)
-        return valid_list
-    return list(valid_paths)
+    return valid_paths

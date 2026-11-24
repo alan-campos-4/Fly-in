@@ -18,6 +18,8 @@ def arguments() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--map_file", default=None)
+    parser.add_argument("--travel", action=argparse.BooleanOptionalAction,
+        default=True)
     parser.add_argument("--log", action=argparse.BooleanOptionalAction)
     parser.add_argument("--visual", action=argparse.BooleanOptionalAction)
     return parser.parse_args()
@@ -78,23 +80,21 @@ def main() -> None:
         exit()
     try:
         if args.log:
+            print(f"Map file: {filename}")
             curr_time = time.time()
         g: Graph = get_data_from_file(filename)
         if args.log:
-            # t_graph = time.time()
-            # print(f"Graph created in {(t_graph - t_start):.6f} seconds")
             curr_time = time_passed("Graph creation", curr_time)
         paths = find_paths(g)
         if args.log:
-            # t_path = time.time()
-            # print(f"Path finding done in {(t_path - t_graph):.6f} seconds")
             curr_time = time_passed("Path finding", curr_time)
-            print("\nPaths: ")
+            print("Paths: ")
             for path in paths:
                 print(f"{path}  [{len(path)}]")
-        travel(g, paths)
-        if args.log:
-            curr_time = time_passed("Movement", curr_time)
+        if args.travel:
+            travel(g, paths, args.log)
+            if args.log:
+                curr_time = time_passed("Movement", curr_time)
         if args.visual:
             g.visualize()
     except OSError as e:
