@@ -21,11 +21,11 @@
 
 #### Pathfinding limitations
 
-- **Blocked zones**: nodes marked with this zonetype are removed from the adjancency list before pathfinding starts, thus preventing them from being used in the algorithm.
+- **Blocked zones**: nodes marked with this zonetype are excluded from the adjancency list before pathfinding starts, thus preventing them from being used in the algorithm.
 
-- **Priority zones**: nodes marked with this zonetype are checked during pathfinding and assigned as the parent of a node when appropiate
+- **Priority zones**: nodes marked with this zonetype are checked during pathfinding and assigned as the parent of a node when appropiate.
 
-- **Restricted zones**: nodes marked with this zonetype make the drone travelling towards it wait for a turn, i.e.: it doesn't move to the next node until the drone tries to move again in the following turn. This is achieved with a specific attribute that is set during the first turn and checked at the beginning of the second.
+- **Restricted zones**: nodes marked with this zonetype make the drone travelling towards it wait for a turn, i.e.: it doesn't move to the next node until the drone tries to move again in the following turn. This is achieved with a specific attribute that is set during the first turn and checked at the beginning of the second. Additionally, their presence
 
 #### Benchmarks
 

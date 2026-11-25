@@ -44,8 +44,7 @@ def is_edge_traversable(edges: dict[int, Edge], edge: int) -> bool:
 
 def try_to_move(d: Drone, nodes: dict[int, Node],
                 edges: dict[int, Edge]) -> bool:
-    """"
-    Make a drone attempt to move to the next node in its path.
+    """"Make a drone attempt to move to the next node in its path.
 
     Check if the next node has enough space, and if the edge that it will
     travel through has enough capacity for it. If so, then change the node's
@@ -64,48 +63,42 @@ def try_to_move(d: Drone, nodes: dict[int, Node],
     Returns:
         True, if the drone has successfuly moved to the next node.
     """
+    moved = False
     next_node_av = is_node_available(nodes, d.next_node)
     # If the drone is set to arrive to a restricted node this turn,
     # change the current node, occupy it and free the edge traversed.
     if d.in_transit:
         if next_node_av:
-            # ### d.curr_node = d.next_node
-            # ### d.pos += 1
             d.move_to_next_node()
-            # ### edges[d.prev_edge].occupancy -= 1
             nodes[d.curr_node].curr_drones += 1
             d.in_transit = False
-            d.update_next_node()
-            if d.delivered:
+            moved = True
+    else:
+        edge_to_travel = find_edge_to_travel(edges, d.curr_node, d.next_node)
+        edge_to_travel_av = is_edge_traversable(edges, edge_to_travel)
+        if next_node_av and edge_to_travel_av:
+            # If there is a previous edge or node, leave it.
+            if d.prev_edge != -1:
                 edges[d.prev_edge].occupancy -= 1
+            if d.prev_node != -1:
                 nodes[d.prev_node].curr_drones -= 1
-            return True
-        return False
-    edge_to_travel = find_edge_to_travel(edges, d.curr_node, d.next_node)
-    edge_to_travel_av = is_edge_traversable(edges, edge_to_travel)
-    if next_node_av and edge_to_travel_av:
-        # If there is a previous edge or node, leave it.
-        if d.prev_edge != -1:
-            edges[d.prev_edge].occupancy -= 1
-        if d.prev_node != -1:
-            nodes[d.prev_node].curr_drones -= 1
-        # If the next node is a resctricted one,
-        if not d.in_transit and nodes[d.next_node].zone.value == 'restricted':
-            # Set current node to -1 and occupy the edge to travel.
-            # ### nodes[d.prev_node].curr_drones -= 1
-            d.prev_node = d.curr_node
-            d.curr_node = -1
+            # Enter the new edge, and set it as the previous edge.
             edges[edge_to_travel].occupancy += 1
             d.prev_edge = edge_to_travel
-            d.in_transit = True
-            return True
-        # Enter the new edge, and set it as the previous edge.
-        edges[edge_to_travel].occupancy += 1
-        d.prev_edge = edge_to_travel
-        # Leave the previous node and enter the next one.
-        d.move_to_next_node()
-        nodes[d.curr_node].curr_drones += 1
-        d.update_next_node()
+            if nodes[d.next_node].zone.value == 'restricted':
+                # If the next node is a resctricted one,
+                # set current node to -1 and the drone to in transit.
+                d.prev_node = d.curr_node
+                d.curr_node = -1
+                d.in_transit = True
+            else:
+                # If the next node is not resctricted,
+                # move to it, and occupy it.
+                d.move_to_next_node()
+                nodes[d.curr_node].curr_drones += 1
+            moved = True
+    # If the drone has sucessfully moved, return True
+    if moved:
         # If the drone has reached the end,
         # leave the previous edge and mark it as delivered.
         if d.delivered:
@@ -113,37 +106,6 @@ def try_to_move(d: Drone, nodes: dict[int, Node],
             nodes[d.prev_node].curr_drones -= 1
         return True
     return False
-
-
-def get_best_path_ind(paths: list[tuple[int, ...]],
-                      nodes: dict[int, Node], log: bool) -> tuple[int, ...]:
-    """Iterate through the paths found and return which one has the
-    lowest cost in terms of turns.
-
-    Args:
-        paths:  the list of valid paths through the node.
-        nodes:  the graph's nodes.
-
-    Returns:
-        the index corresponding to the path witht the lowest cost.
-    """
-    costs = [0 for _ in range(len(paths))]
-    for i in range(len(paths)):
-        for p in paths[i]:
-            zone = nodes[p].zone.value
-            if zone == 'restricted':
-                costs[i] += 2
-            else:
-                costs[i] += 1
-    cost_ind = 0
-    for i in range(len(costs)):
-        if costs[i] < costs[cost_ind]:
-            cost_ind = i
-    if log:
-        print("Costs:")
-        print(costs)
-        print(cost_ind)
-    return cost_ind
 
 
 def travel(g: Graph, paths: list[tuple[int, ...]], log: bool) -> None:
@@ -154,16 +116,15 @@ def travel(g: Graph, paths: list[tuple[int, ...]], log: bool) -> None:
     to move to its next node in its path. The drones that successfully move
     are displayed in the output.
 
+    By default, every drone will try to follow the first path in the list.
+
     Args:
         g:      the Graph object.
         paths:   a list with valid paths between the start and end nodes.
     """
-    if not paths:
-        return
     nodes = g.nodes
     edges = g.edges
-    ind = get_best_path_ind(paths, nodes, log)
-    drones = [Drone(ind=i, path=paths[ind]) for i in range(g.nb_drones)]
+    drones = [Drone(ind=i, path=paths[0]) for i in range(g.nb_drones)]
     # Set the start node with all drones in it.
     nodes[g.start].curr_drones = g.nb_drones
 

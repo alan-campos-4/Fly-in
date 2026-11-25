@@ -158,6 +158,31 @@ def check_edge_remove(adj_list: list[set[int]], nodes: dict[int, Node],
     return removable
 
 
+def sort_path_by_costs(paths: list[tuple[int, ...]],
+                       nodes: dict[int, Node]) -> list[tuple[int, ...]]:
+    """Sort the paths in accordance to their cost. The length of each path
+    as well as any restricted nodes within it will increase its cost.
+
+    Args:
+        paths:  the list of paths.
+        nodes:  the Graph's nodes.
+
+    Returns:
+        the list of paths sorted.
+    """
+    n_paths = len(paths)
+    costs = [0 for _ in range(n_paths)]
+    for i in range(n_paths):
+        for p in paths[i]:
+            zone = nodes[p].zone.value
+            if zone == 'restricted':
+                costs[i] += 2
+            else:
+                costs[i] += 1
+    sorted_paths = [x for _, x in sorted(zip(costs, paths))]
+    return sorted_paths
+
+
 def find_paths(g: Graph) -> list[tuple[int, ...]]:
     """
     Find the shortest path between the start and end nodes.
@@ -170,7 +195,8 @@ def find_paths(g: Graph) -> list[tuple[int, ...]]:
     Once all possible removable edges have been tried, the loop ends.
 
     Returns:
-        a list containing one or more paths between the start and end nodes.
+        a list containing one or more paths between the start and end nodes,
+            ordererd by cost.
 
     Raises:
         PathFindingError:   if the Graph is not solvable.
@@ -220,4 +246,4 @@ def find_paths(g: Graph) -> list[tuple[int, ...]]:
                     node_a = random.choice(list(removable_edges.keys()))
                 else:
                     break
-    return valid_paths
+    return sort_path_by_costs(valid_paths, nodes)

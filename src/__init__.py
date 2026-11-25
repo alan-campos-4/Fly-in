@@ -7,6 +7,6 @@ from .travel import travel
 
 __all__ = [
     'Graph', 'ParserError', 'PathFindingError',
-    'get_data_from_file', 'find_paths', 'get_adjacency_list', 'bfs',
+    'get_data_from_file', 'find_paths', 'bfs',
     'travel',
 ]

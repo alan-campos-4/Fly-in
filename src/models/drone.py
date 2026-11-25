@@ -46,23 +46,18 @@ class Drone(BaseModel):
         self.next_node = self.path[self.pos + 1]
         return self
 
-    def update_next_node(self) -> None:
-        """Determine the next node for this drone.
-        Set it as -1 if the end has been reached."""
-        if self.pos + 1 >= len(self.path):
-            self.next_node = -1
-        else:
-            self.next_node = self.path[self.pos + 1]
-
     def move_to_next_node(self) -> None:
-        """Move this drone to the next node, and change its variables
-        accordingly.
-
-        During transit, curr_node is set to -1, so prev_node is not updated.
+        """Move this drone to the next node and change its variables
+        accordingly. Set the drone as delivered if necessary.
         """
         self.pos += 1
+        # During transit, curr_node is set to -1, so prev_node is not updated.
         if not self.in_transit:
             self.prev_node = self.curr_node
         self.curr_node = self.next_node
         if self.curr_node == self.path[-1]:
             self.delivered = True
+        if self.pos + 1 >= len(self.path):
+            self.next_node = -1
+        else:
+            self.next_node = self.path[self.pos + 1]
