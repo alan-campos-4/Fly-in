@@ -1,4 +1,5 @@
 from .models import Graph, Node, Edge, Drone
+import math
 
 
 def display_drones(drones: list[Drone], nodes: dict[int, Node]) -> None:
@@ -6,10 +7,9 @@ def display_drones(drones: list[Drone], nodes: dict[int, Node]) -> None:
     # print(' '.join(f"{d}-{nodes[d.curr_node].name}" for d in drones))
     for d in drones:
         if d.curr_node != -1:
-            print(f"{d}-{nodes[d.curr_node].name} ", end='')
+            print(f"{d}-{nodes[d.curr_node].name} ")
         else:
-            print(f"{d}__it ", end='')
-    print()
+            print(f"{d}__it ")
 
 
 def all_finished(drones: list[Drone]) -> bool:
@@ -108,7 +108,76 @@ def try_to_move(d: Drone, nodes: dict[int, Node],
     return False
 
 
-def travel(g: Graph, paths: list[tuple[int, ...]], log: bool) -> None:
+def get_drone_paths(n_drones: int,
+                    paths: list[tuple[int, ...]],
+                    spaces: list[int]) -> list[tuple[int, ...]]:
+    """Obtain a list of paths that will be assigned to the drones.
+    The method will depend on the number of drones that need to travel
+    the number of paths available.
+
+    Args:
+        n_drones:   the number of drones.
+        paths:      the list of paths.
+        spaces:     the list of the maximum amount allowed in each path.
+
+    Returns:
+        a list of length n_drones with a path for every drone.
+    """
+
+    def path_fill(drones: list[tuple[int, ...]],
+                  paths: list[tuple[int, ...]],
+                  spaces: list[int],
+                  n_drones: int, n_paths: int) -> None:
+        """Iterate through every drone and assign it to a path.
+        The path to assign will change if it has its capacity filled,
+        or if too many drones have been given it.
+
+        If after the first assignment loop there are drones without paths,
+        repeat the loop without a limit
+
+        An inital limit is established to ensure that drones do not
+        clutter a small number of paths.
+
+        Args:
+            drones:     the paths that will be assigned to the drones.
+            n_paths:    the amount of paths.
+        """
+        assigned = [0] * n_paths
+        limit = math.ceil(n_drones / n_paths)
+        p_i = 0
+        for d_i in range(n_drones):
+            if assigned[p_i] >= limit or assigned[p_i] >= spaces[p_i]:
+                p_i += 1
+            if p_i < n_paths:
+                drones[d_i] = paths[p_i]
+                spaces[p_i] -= 1
+                assigned[p_i] += 1
+            else:
+                p_i = 0
+        for d_i in [i for i in range(n_drones) if drones[i] == 0]:
+            if assigned[p_i] >= spaces[p_i]:
+                p_i += 1
+            if p_i < n_paths:
+                drones[d_i] = paths[p_i]
+                spaces[p_i] -= 1
+                assigned[p_i] += 1
+            else:
+                p_i = 0
+
+    drone_paths = [0] * n_drones
+    n_paths = len(paths)
+    if n_paths == 1:
+        for i in range(n_drones):
+            drone_paths[i] = paths[0]
+    elif n_paths >= n_drones:
+        for i in range(n_drones):
+            drone_paths[i] = paths[i]
+    else:
+        path_fill(drone_paths, paths, spaces, n_drones, n_paths)
+    return drone_paths
+
+
+def travel(g: Graph, log: bool) -> None:
     """Create a list of drones that will travel through the Graph from
     the start to the end following the paths given.
 
@@ -124,7 +193,15 @@ def travel(g: Graph, paths: list[tuple[int, ...]], log: bool) -> None:
     """
     nodes = g.nodes
     edges = g.edges
-    drones = [Drone(ind=i, path=paths[0]) for i in range(g.nb_drones)]
+    n_drones = g.nb_drones
+    drone_paths = get_drone_paths(n_drones, g.paths, g.spaces)
+    drones = [Drone(ind=i, path=drone_paths[i]) for i in range(n_drones)]
+    if log:
+        print("Paths: ")
+        g.print_paths()
+        print("Assigned")
+        for p in drone_paths:
+            print(p)
     # Set the start node with all drones in it.
     nodes[g.start].curr_drones = g.nb_drones
 
@@ -145,12 +222,10 @@ def travel(g: Graph, paths: list[tuple[int, ...]], log: bool) -> None:
         if not_moved_count > 3:
             print("Drones are stuck")
             break
-        """if t > 105:
-            print("Limit surpassed")
-            break"""
         if all_finished(drones):
             break
         t += 1
+
 
 """
   0           1           2           3

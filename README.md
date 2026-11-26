@@ -25,7 +25,7 @@
 
 - **Priority zones**: nodes marked with this zonetype are checked during pathfinding and assigned as the parent of a node when appropiate.
 
-- **Restricted zones**: nodes marked with this zonetype make the drone travelling towards it wait for a turn, i.e.: it doesn't move to the next node until the drone tries to move again in the following turn. This is achieved with a specific attribute that is set during the first turn and checked at the beginning of the second. Additionally, their presence
+- **Restricted zones**: nodes marked with this zonetype make the drone travelling towards it wait for a turn, i.e.: it doesn't move to the next node until the drone tries to move again in the following turn. This is achieved with a specific attribute that is set during the first turn and checked at the beginning of the second. Additionally, their presence will make a path less likely to be assigned to a drone.
 
 #### Benchmarks
 

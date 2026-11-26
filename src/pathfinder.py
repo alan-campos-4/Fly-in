@@ -74,11 +74,11 @@ def shortest_distance(adj_list: list[set[int]], nodes: dict[int, Node],
         size:       the number of nodes in the graph.
 
     Returns:
-        a list with the indexes of the nodes comprising the shortest
-            path, from start to end.
+        a list of the nodes comprising the shortest path
+            between the start and end.
 
     Raises:
-        PathFindingError: if end node could not be reached.
+        PathFindingError:   if end node could not be reached.
     """
     parent, dist = bfs(adj_list, nodes, start, size)
     """
@@ -183,7 +183,7 @@ def sort_path_by_costs(paths: list[tuple[int, ...]],
     return sorted_paths
 
 
-def find_paths(g: Graph) -> list[tuple[int, ...]]:
+def find_paths(g: Graph) -> None:
     """
     Find the shortest path between the start and end nodes.
     Once found, it will try to find alternate paths.
@@ -207,9 +207,8 @@ def find_paths(g: Graph) -> list[tuple[int, ...]]:
     end: int = g.end
     size: int = len(g.nodes)
     adj_list = get_adjacency_list(nodes, g.edges, size)
-    # print_adj_list(adj_list, size)
     path = shortest_distance(adj_list, nodes, start, end, size)
-    valid_paths.append(path)
+    g.add_path(path)
 
     removable_edges = check_edge_remove(adj_list, nodes, start, end, size)
     if removable_edges:
@@ -227,8 +226,8 @@ def find_paths(g: Graph) -> list[tuple[int, ...]]:
             try:
                 new_path = shortest_distance(adj_list, nodes,
                                              start, end, size)
-                if new_path not in valid_paths and len(new_path) <= size:
-                    valid_paths.append(new_path)
+                if new_path not in g.paths and len(new_path) <= size:
+                    g.add_path(new_path)
             except PathFindingError:
                 pass
             # After checking if the new path is possible,
@@ -246,4 +245,4 @@ def find_paths(g: Graph) -> list[tuple[int, ...]]:
                     node_a = random.choice(list(removable_edges.keys()))
                 else:
                     break
-    return sort_path_by_costs(valid_paths, nodes)
+    g.sort_paths()

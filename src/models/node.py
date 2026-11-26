@@ -21,12 +21,12 @@ class Node(BaseModel):
     """A Node in a Graph.
 
     Variables:
-        name:       the name of this node, unique to each one.
-        x, y:       the position of this node.
-        zone:       the zone this node is located in, defined by an enum.
-        color:      the color of this node.
-        max_drones: the maximum amount of drones that can occupy this node.
-        drones:  the amount of drones occupying this node.
+        name:           the name of this node, unique to each one.
+        x, y:           the position of this node.
+        zone:           the zone this node is located in, defined by an enum.
+        color:          the color of this node.
+        max_drones:     the maximum amount of drones that can occupy this node.
+        curr_drones:    the amount of drones occupying this node.
     """
     name: str
     x: int

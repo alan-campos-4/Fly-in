@@ -24,7 +24,7 @@ class Drone(BaseModel):
     if curr_node = -1, the drone is in transit inside an edge.
     """
     ind: int
-    path: tuple[int, ...]
+    path: tuple[int, ...] = Field(default=None)
     pos: int = Field(default=0)
     curr_node: int = Field(default=-1)
     next_node: int = Field(default=-1)

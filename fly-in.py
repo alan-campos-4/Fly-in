@@ -5,7 +5,7 @@ import argparse
 import time
 import traceback
 from src import (
-    Graph, ParserError, PathFindingError,
+    Graph, Path, ParserError, PathFindingError,
     get_data_from_file, find_paths, travel
 )
 
@@ -19,7 +19,7 @@ def arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--map_file", default=None)
     parser.add_argument("--travel", action=argparse.BooleanOptionalAction,
-        default=True)
+                        default=True)
     parser.add_argument("--log", action=argparse.BooleanOptionalAction)
     parser.add_argument("--visual", action=argparse.BooleanOptionalAction)
     return parser.parse_args()
@@ -85,14 +85,11 @@ def main() -> None:
         g: Graph = get_data_from_file(filename)
         if args.log:
             curr_time = time_passed("Graph creation", curr_time)
-        paths = find_paths(g)
+        find_paths(g)
         if args.log:
             curr_time = time_passed("Path finding", curr_time)
-            print("Paths: ")
-            for path in paths:
-                print(f"{path}  [{len(path)}]")
         if args.travel:
-            travel(g, paths, args.log)
+            travel(g, args.log)
             if args.log:
                 curr_time = time_passed("Movement", curr_time)
         if args.visual:

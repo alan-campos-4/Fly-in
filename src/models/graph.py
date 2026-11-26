@@ -22,12 +22,20 @@ class Graph(BaseModel):
                 with the corresponding values.
         start:      the index of this graph's starting node.
         end:        the index of this graph's ending node.
+
+        paths:      all the valid paths found between the start and end.
+        costs:      the minimum cost, in turns, of each path.
+        spaces:     the maximum space, in number of drones, of each path.
     """
     nb_drones: int = Field(ge=1)
     nodes: dict[int, Node]
     edges: dict[int, Edge]
     start: int = Field(ge=0)
     end: int = Field(ge=0)
+    n_paths: int = Field(default=0)
+    paths: list[tuple[int, ...]] = []
+    costs: list[int] = []
+    spaces: list[int] = []
     visual: list[list[int]] = []  # REMOVE
 
     @model_validator(mode='after')
@@ -48,6 +56,36 @@ class Graph(BaseModel):
             node.display()
         for row in self.edges:
             print(row)
+
+    def add_path(self, path: tuple[int, ...]) -> None:
+        """Adds the given path to the Graph's list, and assigns
+        its costs and space."""
+        self.paths.append(path)
+        cost = 0
+        max_d = 0
+        for p in path:
+            zone = self.nodes[p].zone.value
+            space = self.nodes[p].max_drones
+            if space > max_d:
+                max_d = space
+            if zone == 'restricted':
+                cost += 2
+            else:
+                cost += 1
+        self.costs.append(cost)
+        self.spaces.append(max_d)
+        self.n_paths += 1
+
+    def sort_paths(self) -> None:
+        """Sort the Graph's paths by its costs and spaces."""
+        sorted_lists = sorted(zip(self.costs, self.spaces, self.paths))
+        self.paths = [s[2] for s in sorted_lists]
+        self.costs = [s[0] for s in sorted_lists]
+        self.spaces = [s[1] for s in sorted_lists]
+
+    def print_paths(self):
+        for i in range(self.n_paths):
+            print(f"{self.paths[i]}  [{self.costs[i]} | {self.spaces[i]}]")
 
     # ====================
     # REMOVE
