@@ -7,9 +7,10 @@ def display_drones(drones: list[Drone], nodes: dict[int, Node]) -> None:
     # print(' '.join(f"{d}-{nodes[d.curr_node].name}" for d in drones))
     for d in drones:
         if d.curr_node != -1:
-            print(f"{d}-{nodes[d.curr_node].name} ")
+            print(f"{d}-{nodes[d.curr_node].name} ", end='')
         else:
-            print(f"{d}__it ")
+            print(f"{d}__it ", end='')
+    print()
 
 
 def all_finished(drones: list[Drone]) -> bool:
@@ -80,8 +81,6 @@ def try_to_move(d: Drone, nodes: dict[int, Node],
             # If there is a previous edge or node, leave it.
             if d.prev_edge != -1:
                 edges[d.prev_edge].occupancy -= 1
-            if d.prev_node != -1:
-                nodes[d.prev_node].curr_drones -= 1
             # Enter the new edge, and set it as the previous edge.
             edges[edge_to_travel].occupancy += 1
             d.prev_edge = edge_to_travel
@@ -96,6 +95,7 @@ def try_to_move(d: Drone, nodes: dict[int, Node],
                 # move to it, and occupy it.
                 d.move_to_next_node()
                 nodes[d.curr_node].curr_drones += 1
+                nodes[d.prev_node].curr_drones -= 1
             moved = True
     # If the drone has sucessfully moved, return True
     if moved:
@@ -103,77 +103,86 @@ def try_to_move(d: Drone, nodes: dict[int, Node],
         # leave the previous edge and mark it as delivered.
         if d.delivered:
             edges[d.prev_edge].occupancy -= 1
-            nodes[d.prev_node].curr_drones -= 1
         return True
     return False
 
 
-def get_drone_paths(n_drones: int,
-                    paths: list[tuple[int, ...]],
-                    spaces: list[int]) -> list[tuple[int, ...]]:
+def get_drone_paths(g: Graph, paths: list[tuple[int, ...]],
+                    n_paths: int, n_drones: int) -> list[int]:
     """Obtain a list of paths that will be assigned to the drones.
     The method will depend on the number of drones that need to travel
     the number of paths available.
 
     Args:
-        n_drones:   the number of drones.
+        g:          the Graph.
         paths:      the list of paths.
-        spaces:     the list of the maximum amount allowed in each path.
+        n_paths:    the number of paths.
+        n_drones:   the number of drones.
 
     Returns:
-        a list of length n_drones with a path for every drone.
+        a list of with the indexes of paths for every drone.
     """
 
     def path_fill(drones: list[tuple[int, ...]],
                   paths: list[tuple[int, ...]],
-                  spaces: list[int],
+                  g: Graph,
                   n_drones: int, n_paths: int) -> None:
-        """Iterate through every drone and assign it to a path.
+        """Iterate through every drone and assign to it a path.
         The path to assign will change if it has its capacity filled,
         or if too many drones have been given it.
-
-        If after the first assignment loop there are drones without paths,
-        repeat the loop without a limit
 
         An inital limit is established to ensure that drones do not
         clutter a small number of paths.
 
         Args:
             drones:     the paths that will be assigned to the drones.
-            n_paths:    the amount of paths.
+        """
+        """
+        25
+
+            4   7
+            4   7
+            4   7
+            3   5
+
+            15
+
+
+        15 -> 4
+        25 -> 6
         """
         assigned = [0] * n_paths
-        limit = math.ceil(n_drones / n_paths)
+        spaces = g.spaces
+        total_space = sum(spaces)
+        limit = [int(n_drones * s / total_space) for s in spaces] 
+
         p_i = 0
         for d_i in range(n_drones):
-            if assigned[p_i] >= limit or assigned[p_i] >= spaces[p_i]:
+            if assigned[p_i] >= limit[p_i]:
                 p_i += 1
             if p_i < n_paths:
-                drones[d_i] = paths[p_i]
-                spaces[p_i] -= 1
+                drones[d_i] = p_i
                 assigned[p_i] += 1
             else:
                 p_i = 0
-        for d_i in [i for i in range(n_drones) if drones[i] == 0]:
-            if assigned[p_i] >= spaces[p_i]:
-                p_i += 1
+        # If after the first assignment loop there are drones without paths,
+        # repeat the loop without a limit.
+        for d_i in [i for i in range(n_drones) if drones[i] == -1]:
             if p_i < n_paths:
-                drones[d_i] = paths[p_i]
-                spaces[p_i] -= 1
+                drones[d_i] = p_i
                 assigned[p_i] += 1
             else:
                 p_i = 0
 
-    drone_paths = [0] * n_drones
-    n_paths = len(paths)
+    drone_paths = [-1] * n_drones
     if n_paths == 1:
         for i in range(n_drones):
-            drone_paths[i] = paths[0]
+            drone_paths[i] = 0
     elif n_paths >= n_drones:
         for i in range(n_drones):
-            drone_paths[i] = paths[i]
+            drone_paths[i] = i
     else:
-        path_fill(drone_paths, paths, spaces, n_drones, n_paths)
+        path_fill(drone_paths, paths, g, n_drones, n_paths)
     return drone_paths
 
 
@@ -188,33 +197,31 @@ def travel(g: Graph, log: bool) -> None:
     By default, every drone will try to follow the first path in the list.
 
     Args:
-        g:      the Graph object.
-        paths:   a list with valid paths between the start and end nodes.
+        g:  the Graph object.
     """
     nodes = g.nodes
     edges = g.edges
     n_drones = g.nb_drones
-    drone_paths = get_drone_paths(n_drones, g.paths, g.spaces)
-    drones = [Drone(ind=i, path=drone_paths[i]) for i in range(n_drones)]
+    paths_d = get_drone_paths(g, g.paths, g.n_paths, n_drones)
     if log:
-        print("Paths: ")
-        g.print_paths()
         print("Assigned")
-        for p in drone_paths:
-            print(p)
+        for i in range(n_drones):
+            print(f"Drone {i} will take path {paths_d[i]}")
+        print()
+    drones = [Drone(ind=i, path=g.paths[paths_d[i]]) for i in range(n_drones)]
     # Set the start node with all drones in it.
-    nodes[g.start].curr_drones = g.nb_drones
+    nodes[g.start].curr_drones = n_drones
 
     t: int = 1
     not_moved_count: int = 0
-    print()
     while 1:
-        print(f"Turn {t}")
+        print(f"\nTurn {t}")
         moved = []
         for d in drones:
             if not d.delivered and try_to_move(d, nodes, edges):
                 moved.append(d)
                 not_moved_count = 0
+            # print([n.curr_drones for n in nodes.values()])
         if moved:
             display_drones(moved, nodes)
         else:

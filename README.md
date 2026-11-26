@@ -32,9 +32,9 @@
 |   | Map name | Shortest path (nodes) | Best Result (turns) |
 |---|---|---|---|
 | 0 | 01_linear_path.txt    | 4 | 5 |
-| 1 | 02_simple_fork.txt    | 4 | 6 |
-| 2 | 03_basic_capacity.txt | 4 | 5 |
-| 3 | 01_dead_end_trap.txt      | 5 | 12 |
+| 1 | 02_simple_fork.txt    | 4 | 5 |
+| 2 | 03_basic_capacity.txt | 4 | 4 |
+| 3 | 01_dead_end_trap.txt      | 5 | 8 |
 | 4 | 02_circular_loop.txt      | 5 | 15 |
 | 5 | 03_priority_puzzle.txt    | 5 | 12 |
 | 6 | 01_maze_nightmare.txt         |  7 | 20 |

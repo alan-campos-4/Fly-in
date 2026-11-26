@@ -25,7 +25,7 @@ class Graph(BaseModel):
 
         paths:      all the valid paths found between the start and end.
         costs:      the minimum cost, in turns, of each path.
-        spaces:     the maximum space, in number of drones, of each path.
+        spaces:     the average space, in number of drones, of each path.
     """
     nb_drones: int = Field(ge=1)
     nodes: dict[int, Node]
@@ -60,20 +60,18 @@ class Graph(BaseModel):
     def add_path(self, path: tuple[int, ...]) -> None:
         """Adds the given path to the Graph's list, and assigns
         its costs and space."""
-        self.paths.append(path)
         cost = 0
-        max_d = 0
+        space_total = 0
         for p in path:
             zone = self.nodes[p].zone.value
-            space = self.nodes[p].max_drones
-            if space > max_d:
-                max_d = space
+            space_total += self.nodes[p].max_drones
             if zone == 'restricted':
                 cost += 2
             else:
                 cost += 1
         self.costs.append(cost)
-        self.spaces.append(max_d)
+        self.spaces.append(int(space_total / len(path)))
+        self.paths.append(path)
         self.n_paths += 1
 
     def sort_paths(self) -> None:
