@@ -29,19 +29,18 @@
 
 #### Benchmarks
 
-|   | Map name | Shortest path (nodes) | Best Result (turns) |
-|---|---|---|---|
-| 0 | 01_linear_path.txt    | 4 | 5 |
-| 1 | 02_simple_fork.txt    | 4 | 5 |
-| 2 | 03_basic_capacity.txt | 4 | 4 |
-| 3 | 01_dead_end_trap.txt      | 5 | 8 |
-| 4 | 02_circular_loop.txt      | 5 | 15 |
-| 5 | 03_priority_puzzle.txt    | 5 | 12 |
-| 6 | 01_maze_nightmare.txt         |  7 | 20 |
-| 7 | 02_capacity_hell.txt          |  6 | 27 |
-| 8 | 03_ultimate_challenge.txt     | 13 | 40 |
-| 9 | 01_the_impossible_dream.txt   | 16 | 115 |
-
+|   | Map name | Shortest path (nodes) | Best Result (turns) | Best Result (turns) (multiple paths) |
+|---|---|---|---|---|
+| 0 | 01_linear_path.txt    | 4 | 4 | 4 |
+| 1 | 02_simple_fork.txt    | 4 | 5 | 6 |
+| 2 | 03_basic_capacity.txt | 4 | 4 | 4 |
+| 3 | 01_dead_end_trap.txt      | 5 |  8 |  8 |
+| 4 | 02_circular_loop.txt      | 5 | 15 | 15 |
+| 5 | 03_priority_puzzle.txt    | 5 |  7 |  8 |
+| 6 | 01_maze_nightmare.txt         |  7 | 14 | 13 |
+| 7 | 02_capacity_hell.txt          |  6 | 13 | 16 |
+| 8 | 03_ultimate_challenge.txt     | 13 | 32 | 26 |
+| 9 | 01_the_impossible_dream.txt   | 16 | 90 | 91 |
 
 ## Instructions
 
@@ -74,6 +73,8 @@ The AI chatbot Claude was used to resolve incedental problems and unexpected res
 
 # TODO
 
-- Change between paths
-- Fill Readme
-- (OPTIONAL) gui
+• A detailed description of your algorithm choices and implementation strategy must
+also be included.
+• Documentation of the visual representation features and how they enhance the user
+experience.
+• Example input and expected output demonstrating the program’s functionality.

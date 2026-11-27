@@ -20,6 +20,8 @@ def arguments() -> argparse.Namespace:
     parser.add_argument("--map_file", default=None)
     parser.add_argument("--travel", action=argparse.BooleanOptionalAction,
                         default=True)
+    parser.add_argument("--multipath", action=argparse.BooleanOptionalAction,
+                        default=True)
     parser.add_argument("--log", action=argparse.BooleanOptionalAction)
     parser.add_argument("--visual", action=argparse.BooleanOptionalAction)
     return parser.parse_args()
@@ -91,7 +93,7 @@ def main() -> None:
             print("Paths: ")
             g.print_paths()
         if args.travel:
-            travel(g, args.log)
+            travel(g, args.log, args.multipath)
             if args.log:
                 curr_time = time_passed("Movement", curr_time)
         if args.visual:
