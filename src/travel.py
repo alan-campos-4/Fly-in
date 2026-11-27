@@ -4,12 +4,11 @@ import math
 
 def display_drones(drones: list[Drone], nodes: dict[int, Node]) -> None:
     """Print the drones and the name their current node."""
-    # print(' '.join(f"{d}-{nodes[d.curr_node].name}" for d in drones))
     for d in drones:
         if d.curr_node != -1:
             print(f"{d}-{nodes[d.curr_node].name} ", end='')
         else:
-            print(f"{d}__it ", end='')
+            print(f"{d}-{nodes[d.prev_node].name}-{nodes[d.next_node].name} ", end='')
     print()
 
 
@@ -95,8 +94,8 @@ def try_to_move(d: Drone, nodes: dict[int, Node],
                 # If the next node is not resctricted,
                 # move to it, and occupy it.
                 d.move_to_next_node()
-                nodes[d.curr_node].curr_drones += 1
                 nodes[d.prev_node].curr_drones -= 1
+                nodes[d.curr_node].curr_drones += 1
             moved = True
     # If the drone has sucessfully moved, return True
     if moved:
@@ -181,8 +180,6 @@ def travel(g: Graph, log: bool, multipath: bool) -> None:
     to move to its next node in its path. The drones that successfully move
     are displayed in the output.
 
-    By default, every drone will try to follow the first path in the list.
-
     Args:
         g:          the Graph object.
         log:        if True, display more information.
@@ -190,30 +187,30 @@ def travel(g: Graph, log: bool, multipath: bool) -> None:
     """
     nodes = g.nodes
     edges = g.edges
+    paths = g.paths
     n_drones = g.nb_drones
+    # Set the drones' path depending on the flag.
     if multipath:
-        paths_d = get_drone_paths(g, g.paths, g.n_paths, n_drones)
+        paths_d = get_drone_paths(g, paths, g.n_paths, n_drones)
         if log:
             print("Assigned")
             for i in range(n_drones):
                 print(f"Drone {i} will take path {paths_d[i]}")
             print()
-        drones = [Drone(ind=i, path=g.paths[paths_d[i]]) for i in range(n_drones)]
+        drones = [Drone(ind=i, path=paths[paths_d[i]]) for i in range(n_drones)]
     else:
-        drones = [Drone(ind=i, path=g.paths[0]) for i in range(n_drones)]
+        drones = [Drone(ind=i, path=paths[0]) for i in range(n_drones)]
     # Set the start node with all drones in it.
     nodes[g.start].curr_drones = n_drones
 
     t: int = 1
     not_moved_count: int = 0
     while 1:
-        print(f"\nTurn {t}")
         moved = []
         for d in drones:
             if not d.delivered and try_to_move(d, nodes, edges):
                 moved.append(d)
                 not_moved_count = 0
-        # print([n.curr_drones for n in nodes.values()])
         if moved:
             display_drones(moved, nodes)
         else:
@@ -224,6 +221,7 @@ def travel(g: Graph, log: bool, multipath: bool) -> None:
         if all_finished(drones):
             break
         t += 1
+    print(f"{t} turns")
 
 
 """

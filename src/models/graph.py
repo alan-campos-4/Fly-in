@@ -82,6 +82,7 @@ class Graph(BaseModel):
         self.spaces = [s[1] for s in sorted_lists]
 
     def print_paths(self):
+        print("Paths: ")
         for i in range(self.n_paths):
             print(f"{self.paths[i]}  [{self.costs[i]} | {self.spaces[i]}]")
 

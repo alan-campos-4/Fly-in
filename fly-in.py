@@ -90,7 +90,6 @@ def main() -> None:
         find_paths(g)
         if args.log:
             curr_time = time_passed("Path finding", curr_time)
-            print("Paths: ")
             g.print_paths()
         if args.travel:
             travel(g, args.log, args.multipath)

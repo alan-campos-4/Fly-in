@@ -29,22 +29,59 @@
 
 #### Benchmarks
 
-|   | Map name | Shortest path (nodes) | Best Result (turns) | Best Result (turns) (multiple paths) |
-|---|---|---|---|---|
-| 0 | 01_linear_path.txt    | 4 | 4 | 4 |
-| 1 | 02_simple_fork.txt    | 4 | 5 | 6 |
-| 2 | 03_basic_capacity.txt | 4 | 4 | 4 |
-| 3 | 01_dead_end_trap.txt      | 5 |  8 |  8 |
-| 4 | 02_circular_loop.txt      | 5 | 15 | 15 |
-| 5 | 03_priority_puzzle.txt    | 5 |  7 |  8 |
-| 6 | 01_maze_nightmare.txt         |  7 | 14 | 13 |
-| 7 | 02_capacity_hell.txt          |  6 | 13 | 16 |
-| 8 | 03_ultimate_challenge.txt     | 13 | 32 | 26 |
-| 9 | 01_the_impossible_dream.txt   | 16 | 90 | 91 |
+<table>
+    <tr>
+        <td></td><td rowspan=2 colspan=2>Map name</td><td rowspan=2>Shortest path (nodes)</td><td>Best result (turns)</td><td>Best result (turns)</td>
+    </tr>
+    <tr>
+        <td></td><td>Single path</td><td>Multiple paths</td>
+    </tr>
+    <tr>
+        <td>0</td><td rowspan=3>easy</td><td>01_linear_path.txt</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+    <tr>
+        <td>1</td><td>02_simple_fork.txt</td><td>4</td><td>5</td><td>6</td>
+    </tr>
+    <tr>
+        <td>2</td><td>03_basic_capacity.txt</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+    <tr>
+        <td>3</td><td rowspan=3>medium</td><td>01_dead_end_trap.txt</td><td>5</td><td>8</td><td>8</td>
+    </tr>
+    <tr>
+        <td>4</td><td>02_circular_loop.txt</td><td>5</td><td>15</td><td>15</td>
+    </tr>
+    <tr>
+        <td>5</td><td>03_priority_puzzle.txt</td><td>5</td><td>7</td><td>8</td>
+    </tr>
+    <tr>
+        <td>6</td><td rowspan=3>hard</td><td>01_maze_nightmare.txt</td><td>7</td><td>14</td><td>13</td>
+    </tr>
+    <tr>
+        <td>7</td><td>02_capacity_hell.txt</td><td>6</td><td>13</td><td>16</td>
+    </tr>
+    <tr>
+        <td>8</td><td>03_ultimate_challenge.txt</td><td>13</td><td>32</td><td>26</td>
+    </tr>
+    <tr>
+        <td>9</td><td>challenger</td><td>01_the_impossible_dream.txt</td><td>16</td><td>90</td><td>91</td>
+    </tr>
+</table>
 
 ## Instructions
 
-...
+```bash
+make run
+```
+
+The command has the following flags:
+    --map_file N    Select a specific map file (1,9).
+    --log           Show all the paths found and assigned.
+
+
+```bash
+make run ARGS="--map_file=5 --log"
+```
 
 ## Resources
 
